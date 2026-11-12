@@ -1,0 +1,30 @@
+{
+  "spec": "lewm",
+  "seed": 0,
+  "fit_frames": 2000,
+  "test_clips": 128,
+  "cube": {
+    "probe_err_real_frames_m": 0.04995318838984067,
+    "probe_err_predicted_k5_m": 0.06688697349614975,
+    "mean_baseline_err_m": 0.1822275626505815,
+    "true_displacement_0_to_5_m": 0.05132333993404163,
+    "share_clips_moving_gt_4cm": 0.28125
+  },
+  "effector": {
+    "probe_err_real_frames_m": 0.015527693104712977,
+    "probe_err_predicted_k5_m": 0.025634303634488723,
+    "mean_baseline_err_m": 0.17799533651687388,
+    "true_displacement_0_to_5_m": 0.23024148167601977,
+    "share_clips_moving_gt_4cm": 0.9921875
+  },
+  "latent_dist_vs_displacements": {
+    "r2_arm_only": 0.5022333536751411,
+    "r2_cube_only": 0.007860152262652131,
+    "r2_both": 0.5262177830400785,
+    "coef_arm_cube_const": [
+      1402.0900094529468,
+      736.7595201192227,
+      116.72006942555302
+    ]
+  }
+}

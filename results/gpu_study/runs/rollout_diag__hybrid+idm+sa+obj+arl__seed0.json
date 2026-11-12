@@ -1,0 +1,47 @@
+{
+  "spec": "hybrid+idm+sa+obj+arl",
+  "seed": 0,
+  "clips": 128,
+  "candidates": 16,
+  "perturbed_identifiability": {
+    "sigma=0.1": {
+      "true_top1": 0.21875,
+      "mean_rank": 2.7109375
+    },
+    "sigma=0.3": {
+      "true_top1": 0.71875,
+      "mean_rank": 0.421875
+    },
+    "sigma=1": {
+      "true_top1": 1.0,
+      "mean_rank": 0.0
+    }
+  },
+  "pred_err_true_actions_by_k": [
+    4.21999979019165,
+    5.559999942779541,
+    6.659999847412109,
+    7.460000038146973,
+    8.850000381469727
+  ],
+  "copy_baseline_err_by_k": [
+    108.87000274658203,
+    215.1699981689453,
+    251.7100067138672,
+    265.0199890136719,
+    279.0899963378906
+  ],
+  "pred_err_over_copy_by_k": [
+    0.039000000804662704,
+    0.026000000536441803,
+    0.026000000536441803,
+    0.02800000086426735,
+    0.03200000151991844
+  ],
+  "true_chunk_top1_at_k5": 0.9921875,
+  "true_chunk_mean_rank_at_k5": 0.0078125,
+  "true_chunk_top1_at_k1": 0.9921875,
+  "true_chunk_mean_rank_at_k1": 0.0078125,
+  "chance_top1": 0.0625,
+  "chance_mean_rank": 7.5
+}

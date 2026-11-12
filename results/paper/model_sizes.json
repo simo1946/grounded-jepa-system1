@@ -1,0 +1,45 @@
+{
+ "world_models": {
+  "C1": {
+   "spec": "lewm",
+   "params": 17921732,
+   "grounding_head_params": 0
+  },
+  "C2": {
+   "spec": "lewm+idm+sa",
+   "params": 18342131,
+   "grounding_head_params": 420399
+  },
+  "C3": {
+   "spec": "lewm+idm+sa+obj",
+   "params": 18345209,
+   "grounding_head_params": 423477
+  },
+  "C5": {
+   "spec": "hybrid+idm+sa+obj",
+   "params": 18293457,
+   "grounding_head_params": 423477
+  },
+  "C6": {
+   "spec": "lewm+idm+sa+obj+arl",
+   "params": 18345209,
+   "grounding_head_params": 423477
+  },
+  "C7": {
+   "spec": "hybrid+idm+sa+obj+arl",
+   "params": 18293457,
+   "grounding_head_params": 423477
+  }
+ },
+ "policies": {
+  "system1": 688378,
+  "short_chunk_5": 585778,
+  "short_chunk_1": 565258,
+  "gcidm_ours": 1549317,
+  "gcidm_ours_no_horizon": 728069
+ },
+ "official_gcidm": {
+  "params": 1549317,
+  "commit": "48c45b1cb2b34dd2c1c61d222c8309de567fde55"
+ }
+}

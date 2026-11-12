@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hybrid-wm"
+version = "0.1.0"
+description = "Code for: Grounded JEPA World Models for Fast System-1 Control"
+requires-python = ">=3.10"
+dependencies = ["torch>=2.3", "numpy", "scipy", "h5py", "stable-worldmodel==0.1.1", "ogbench==1.2.1", "nbformat"]
+
+[project.optional-dependencies]
+gpu = ["mamba-ssm"]
+test = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "bench/lewm_suite"]
+pythonpath = ["src", "bench/lewm_suite"]
+addopts = "-q"

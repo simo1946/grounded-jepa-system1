@@ -1,0 +1,30 @@
+{
+  "spec": "lewm+idm+sa+obj",
+  "seed": 0,
+  "fit_frames": 2000,
+  "test_clips": 128,
+  "cube": {
+    "probe_err_real_frames_m": 0.019910676308095815,
+    "probe_err_predicted_k5_m": 0.024048103285355928,
+    "mean_baseline_err_m": 0.1822275626505815,
+    "true_displacement_0_to_5_m": 0.05132333993404163,
+    "share_clips_moving_gt_4cm": 0.28125
+  },
+  "effector": {
+    "probe_err_real_frames_m": 0.01166603685946667,
+    "probe_err_predicted_k5_m": 0.012822862344217187,
+    "mean_baseline_err_m": 0.17799533651687388,
+    "true_displacement_0_to_5_m": 0.23024148167601977,
+    "share_clips_moving_gt_4cm": 0.9921875
+  },
+  "latent_dist_vs_displacements": {
+    "r2_arm_only": 0.4883192367674458,
+    "r2_cube_only": 0.013935008598415566,
+    "r2_both": 0.5219791691812351,
+    "coef_arm_cube_const": [
+      1293.3073533933568,
+      813.2190605128837,
+      175.65145502070956
+    ]
+  }
+}

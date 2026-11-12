@@ -1,0 +1,39 @@
+# Base of osaudit.toml (https://github.com/ASSERT-KTH/osaudit). paper/build.py appends one [[numbers.derive]] entry per
+# number printed from a results value and one [[numbers.allow]] entry per setting or number from a cited work.
+
+[paper]
+pdf = "paper/paper.pdf"
+
+[results]
+files = ["results/paper/*.json"]
+instruments = [
+  "bench/lewm_suite/paper_values_gpu.py", "bench/lewm_suite/analyze_colab.py", "bench/lewm_suite/colab_plan.py",
+  "bench/lewm_suite/cluster_bootstrap.py", "bench/lewm_suite/analyze_feedback.py", "bench/lewm_suite/model_sizes.py",
+  "bench/lewm_suite/trivial_share.py", "bench/lewm_suite/analyze_rerun.py", "bench/lewm_suite/instrument_io.py",
+]
+
+[[results.depends]]
+file = "results/paper/gpu_cube.json"
+instruments = ["bench/lewm_suite/paper_values_gpu.py", "bench/lewm_suite/analyze_colab.py",
+               "bench/lewm_suite/colab_plan.py", "bench/lewm_suite/cluster_bootstrap.py"]
+
+[[results.depends]]
+file = "results/paper/gpu_tworoom.json"
+instruments = ["bench/lewm_suite/paper_values_gpu.py", "bench/lewm_suite/analyze_colab.py",
+               "bench/lewm_suite/colab_plan.py", "bench/lewm_suite/cluster_bootstrap.py"]
+
+[[results.depends]]
+file = "results/paper/feedback.json"
+instruments = ["bench/lewm_suite/analyze_feedback.py", "bench/lewm_suite/cluster_bootstrap.py"]
+
+[[results.depends]]
+file = "results/paper/model_sizes.json"
+instruments = ["bench/lewm_suite/model_sizes.py", "bench/lewm_suite/instrument_io.py"]
+
+[[results.depends]]
+file = "results/paper/trivial_share_cpu.json"
+instruments = ["bench/lewm_suite/trivial_share.py"]
+
+[[results.depends]]
+file = "results/paper/cpu_rerun.json"
+instruments = ["bench/lewm_suite/analyze_rerun.py", "bench/lewm_suite/instrument_io.py"]

@@ -1,0 +1,47 @@
+{
+  "spec": "lewm+idm+sa+obj+arl",
+  "seed": 0,
+  "clips": 128,
+  "candidates": 16,
+  "perturbed_identifiability": {
+    "sigma=0.1": {
+      "true_top1": 0.03125,
+      "mean_rank": 4.7265625
+    },
+    "sigma=0.3": {
+      "true_top1": 0.390625,
+      "mean_rank": 1.21875
+    },
+    "sigma=1": {
+      "true_top1": 0.9609375,
+      "mean_rank": 0.0390625
+    }
+  },
+  "pred_err_true_actions_by_k": [
+    4.420000076293945,
+    5.900000095367432,
+    7.539999961853027,
+    8.760000228881836,
+    10.609999656677246
+  ],
+  "copy_baseline_err_by_k": [
+    93.18000030517578,
+    195.1699981689453,
+    232.19000244140625,
+    245.4199981689453,
+    257.42999267578125
+  ],
+  "pred_err_over_copy_by_k": [
+    0.04699999839067459,
+    0.029999999329447746,
+    0.03200000151991844,
+    0.035999998450279236,
+    0.04100000113248825
+  ],
+  "true_chunk_top1_at_k5": 0.9921875,
+  "true_chunk_mean_rank_at_k5": 0.0078125,
+  "true_chunk_top1_at_k1": 0.984375,
+  "true_chunk_mean_rank_at_k1": 0.015625,
+  "chance_top1": 0.0625,
+  "chance_mean_rank": 7.5
+}

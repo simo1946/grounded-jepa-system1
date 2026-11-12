@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+bench/lewm_suite/swm_home/
+bench/lewm_suite/logs/
+*.h5
+*.pt
+.ruff_cache/
+paper/build/
+node_modules/
