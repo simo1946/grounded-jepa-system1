@@ -20,8 +20,9 @@ LEWM_COMMIT = "8edfeb336732b5f3ce7b8b210d0ba370a09e2cac"
 INTRO = """# Already-solved pairs in the official LeWM Cube dataset
 
 1. Upload `grounded-jepa-system1.zip` to `MyDrive/hybrid-wm/` (as for the GPU study), replacing the old one.
-2. Runtime: the T4 GPU runtime, as for the GPU study (its rendering setup is known to work). Run all cells.
-   The download is about 46 GB and is streamed: only the extracted `.h5` file is written.
+2. Runtime: a GPU runtime (its rendering setup is known to work) with at least 100 GB of free disk: the
+   download is about 46 GB and is streamed, but the `.h5` file it holds is 95 GB and must be written to disk.
+   The first cell prints the free disk; stop there if it shows less than 100 GB.
 3. The result is saved to `MyDrive/hybrid-wm/official_cube_check.json` as soon as the already-solved share is
    computed, and again after the authors' random-policy evaluation, which runs 50 environments in parallel and
    needs about 9 GB of RAM. If that step runs out of memory, the file records the error and still holds the share.

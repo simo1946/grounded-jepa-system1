@@ -1,0 +1,12 @@
+{
+ "source": "cube__random__off25_bud50_es42.json",
+ "pair_index": 4,
+ "episode": 7,
+ "start_step": 63,
+ "goal_offset": 25,
+ "already_solved": true,
+ "arm_moved_m": 0.5855719721674773,
+ "cube_moved_m": 3.262319612175579e-11,
+ "already_solved_pairs": 36,
+ "pairs": 50
+}

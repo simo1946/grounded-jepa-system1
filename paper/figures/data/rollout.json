@@ -1,0 +1,43 @@
+{
+ "spec": "lewm+idm+sa+obj",
+ "config": "C3",
+ "seed": 0,
+ "policy_file": "policy_s1.pt",
+ "controller": "s1",
+ "k": 1,
+ "pair_index": 36,
+ "episode": 60,
+ "start_step": 25,
+ "goal_offset": 25,
+ "success": true,
+ "steps_to_success": 22,
+ "cube_moved_m": 0.3985869425830021,
+ "solved": 39,
+ "pairs": 50,
+ "start_state": {
+  "cube": [
+   0.48392647414690304,
+   0.12538904569784953,
+   0.16248687051783026
+  ],
+  "effector": [
+   0.4737357979195858,
+   0.12391691922850792,
+   0.16598773189370777
+  ]
+ },
+ "goal_state": {
+  "cube": [
+   0.4709024353178473,
+   -0.24622081318321368,
+   0.018931870630536484
+  ],
+  "effector": [
+   0.4629111234714355,
+   -0.2500147608356421,
+   0.02518874543358024
+  ]
+ },
+ "same_outcomes_as": "cube__lewm+idm+sa+obj__seed0__s1_k1__pol-policy_s1__nontrivial__off25_bud50_es42.json",
+ "same_outcomes": true
+}

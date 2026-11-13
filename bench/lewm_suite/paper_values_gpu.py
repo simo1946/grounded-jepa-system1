@@ -1,7 +1,8 @@
 """Every number the paper cites from the GPU study, as one JSON object on stdout.
 
 Reads the per-pair result files of the GPU study (results/gpu_study/runs) and computes, with the functions of
-analyze_colab.py: success per configuration and evaluation (mean and standard error over seeds, and each seed),
+analyze_colab.py: success per configuration and evaluation (mean and standard error over seeds, each seed, and a
+95% pair-bootstrap interval),
 every paired contrast (pooled and per seed: success of A and B, pairs solved only by A or only by B, exact
 McNemar p, pair-bootstrap interval and p, Holm correction over the pre-registered family), the read-out and
 ranking diagnostics, and evaluation times. Success and differences are in percent (points); counts are integers.
@@ -36,12 +37,16 @@ def success(res: dict) -> dict:
         out[c][e]["seeds"][f"s{s}"] = float(100 * v.mean())
         out[c][e]["solved"][f"s{s}"] = int(v.sum())
     for c in out:
-        for d in out[c].values():
+        for e, d in out[c].items():
             x = np.array(list(d["seeds"].values()))
             d["mean"] = float(x.mean())
             d["n_seeds"] = len(x)
             if len(x) > 1:
                 d["se"] = float(x.std(ddof=1) / np.sqrt(len(x)))
+            # 95% interval of the success over seeds: pairs resampled, each bringing its outcomes for all seeds
+            units = np.stack([res[(c, s, e)] for (c2, s, e2) in sorted(res) if c2 == c and e2 == e]).astype(float)
+            bs = cluster_bootstrap(units, np.zeros_like(units), None, N_BOOT)
+            d["ci_lo"], d["ci_hi"] = bs["ci_lo"], bs["ci_hi"]
     return out
 
 

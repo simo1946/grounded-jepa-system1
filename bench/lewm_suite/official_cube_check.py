@@ -1,7 +1,8 @@
 """Check, on the LeWM authors' released Cube dataset, how many evaluation pairs are already solved at the start,
 and what a random policy scores on their protocol.
 
-Meant for a Colab (or any Linux) machine with internet access and about 60-100 GB of free disk:
+Meant for a Linux machine with internet access and at least 100 GB of free disk (the archive holds one 95 GB .h5
+file, measured on 2026-11-13; it must be on disk to be read):
 
     python official_cube_check.py --out official_cube_check.json            # steps 1-2
     python official_cube_check.py --out official_cube_check.json --random-eval --lewm-repo le-wm   # + step 3
