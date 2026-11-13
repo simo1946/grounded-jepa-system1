@@ -196,3 +196,57 @@ The action-resolution loss (ARL) asks the predictor to rank the executed action 
 TABLE: impl
 
 REFERENCES
+
+[1] L. Maes, Q. Le Lidec, D. Scieur, Y. LeCun, R. Balestriero. LeWorldModel: Stable end-to-end joint-embedding predictive architecture from pixels. arXiv:2603.19312, 2026.
+
+[2] G. Zhou, H. Pan, Y. LeCun, L. Pinto. DINO-WM: World models on pre-trained visual features enable zero-shot planning. arXiv:2411.04983, 2024.
+
+[3] S. Park, K. Frans, B. Eysenbach, S. Levine. OGBench: Benchmarking offline goal-conditioned RL. ICLR 2025. arXiv:2410.20092.
+
+[4] R. Balestriero, Y. LeCun. LeJEPA: Provable and scalable self-supervised learning without the heuristics. arXiv:2511.08544, 2025.
+
+[5] W. Zhang, B. Terver, M. Rabbat, Y. LeCun, R. Balestriero. H-JEPA: End-to-end learning of hierarchical world models for visual planning. arXiv:2610.06805, 2026.
+
+[6] L. Maes, Q. Le Lidec, D. Haramati, N. Massaudi, D. Scieur, Y. LeCun, R. Balestriero. stable-worldmodel-v1: Reproducible world modeling research and evaluation. arXiv:2602.08968, 2026.
+
+[7] P. Ivashkov, R. Balestriero, B. Schölkopf. Sensorimotor world models: Perception for action via inverse dynamics. arXiv:2606.20104, 2026.
+
+[8] D. Ghosh, A. Gupta, A. Reddy, J. Fu, C. Devin, B. Eysenbach, S. Levine. Learning to reach goals via iterated supervised learning. ICLR 2021. arXiv:1912.06088.
+
+[9] S. Park, D. Ghosh, B. Eysenbach, S. Levine. HIQL: Offline goal-conditioned RL with latent states as actions. NeurIPS 2023. arXiv:2307.11949.
+
+[10] C. Chi, S. Feng, Y. Du, Z. Xu, E. Cousineau, B. Burchfiel, S. Song. Diffusion Policy: Visuomotor policy learning via action diffusion. RSS 2023. arXiv:2303.04137.
+
+[11] X. Liu, C. Gong, Q. Liu. Flow straight and fast: Learning to generate and transfer data with rectified flow. ICLR 2023. arXiv:2209.03003.
+
+[12] L. Ankile, Z. Jiang, R. Duan, G. Shi, P. Abbeel, A. Nagabandi. Residual off-policy RL for finetuning behavior cloning policies. arXiv:2509.19301, 2025.
+
+[13] E. Su, T. Westenbroek, A. Nagabandi, A. Gupta. RFS: Reinforcement learning with residual flow steering for dexterous manipulation. ICLR 2026. arXiv:2602.01789.
+
+[14] A. Y. Ng, D. Harada, S. Russell. Policy invariance under reward transformations: Theory and application to reward shaping. ICML 1999.
+
+[15] S. Ross, G. Gordon, D. Bagnell. A reduction of imitation learning and structured prediction to no-regret online learning. AISTATS 2011.
+
+[16] Contrastive-LM. CLM: contrastive language model (code and model release; no accompanying paper found as of November 2026). https://github.com/Contrastive-LM/CLM, 2026.
+
+[17] J. Kwok, X. Zhang, M. Xu, Y. Liu, A. Mirhoseini, C. Finn, M. Pavone. Scaling verification can be more effective than scaling policy learning for vision-language-action alignment. arXiv:2602.12281, 2026.
+
+[18] A. Lahoti, K. Y. Li, B. Chen, C. Wang, A. Bick, J. Z. Kolter, T. Dao, A. Gu. Mamba-3: Improved sequence modeling using state space principles. ICLR 2026. arXiv:2603.15569.
+
+[19] H. Yan, J. Zhu, et al. Is forward prediction enough? Physical state grounding for JEPA world models. arXiv:2608.06799, 2026.
+
+[20] M. Liu, Y. Huang, Z. Liang, X. Gao. Toward physically grounded JEPA world models for goal-conditioned robotic planning. arXiv:2609.03565, 2026.
+
+[21] X. Zeng, H. Ren, Z. Song, Y. Nie, R. Drummond. PhyLatent: Learning dynamics-relevant representations for JEPA world models. arXiv:2608.05720, 2026.
+
+[22] H. Nguyen, X. Xu, X. Huang. Latent geometry beyond search: Amortizing planning in world models. arXiv:2605.08732, 2026.
+
+[23] H.-W. Huang, J. Shangguan, J. Lu, J.-N. Hwang. LeFlow: Generative latent flow planning for world models. arXiv:2608.24855, 2026.
+
+[24] M. Fu, T. Siebert, E. Halicki, R. Balestriero. LeWAM: End-to-end world and action modeling with JEPAs. arXiv:2610.12818, 2026.
+
+[25] B. Terver et al. What drives success in physical planning with joint-embedding predictive world models? arXiv:2512.24497, 2025.
+
+[26] H. Molin, W. Peng, M. Bagatella, R. Balestriero. World modeling through spectral alignment. arXiv:2610.15429, 2026.
+
+[27] A. Zholus, N. Beltran-Velez, J. Yuan, S. Chandar, T. Nagarajan, D. Severo, K. Sinha, M. Drozdzal, A. Romero Soriano, J. Bohg, N. Ballas, M. Assran. RoboJEPA: Scaling robotic latent world models. arXiv:2610.10515, 2026.

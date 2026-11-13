@@ -800,5 +800,26 @@
     "solved_trivial": 6
    }
   }
+ },
+ "provenance": {
+  "schema": "https://github.com/ASSERT-KTH/assert-research-agent/blob/main/schemas/provenance-v1.json",
+  "command": [
+   "python3",
+   "bench/lewm_suite/paper_values_gpu.py",
+   "--runs",
+   "results/gpu_study/runs",
+   "--task",
+   "tworoom"
+  ],
+  "cwd": ".",
+  "inputs": [
+   {
+    "path": "results/gpu_study/runs",
+    "sha256": "a70258c67614de517405c8a20dcda4c2f51fab6b06114b86aa3fc2f782b753c4"
+   }
+  ],
+  "commit": "23b5e9c3deb19ff8c27fb9f5a6f87047c85bfde4",
+  "now": "2026-11-13T02:44:35+00:00",
+  "osaudit": "0.7.0"
  }
 }

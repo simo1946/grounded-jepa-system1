@@ -19,7 +19,7 @@ and placeholders, which are the only way a number enters the text:
     {{sgn1: expr}}    a signed difference with 1 decimal ("+16.7", "−19.4")
     {{dec1: expr}}    a number that may be negative, minus sign only ("−3.3", "8.9"), e.g. interval ends
     {{int: expr}}     a count (the value must be a JSON integer)
-    {{p: expr}}       a p-value ("0.006", "0.39", "1", or "< 0.001")
+    {{p: expr}}       a p-value ("0.006", "0.39", "1", or "< 0.001"; "p = {{p: expr}}" then reads "p < 0.001")
     {{set: 64 | why}}       a setting of the study (an osaudit allow entry with that reason)
     {{ext: 42 | [22] | why}} a number taken from a cited work (allow entry citing the reference)
     {{fact: 3,000 | why}}   a recorded fact that no results file holds (allow entry with that reason)
@@ -195,7 +195,12 @@ class Formatter:
         return s
 
     def text(self, s: str) -> str:
-        return re.sub(r"\{\{\s*(\w+)\s*:(.*?)\}\}", lambda m: self.fmt(m.group(1), m.group(2)), s)
+        def sub(m: re.Match) -> str:
+            out = self.fmt(m.group(2), m.group(3))
+            if m.group(1) and out.startswith("< "):          # "p = {{p: x}}" with x below the floor reads "p < 0.001"
+                return out
+            return (m.group(1) or "") + out
+        return re.sub(r"(=\s)?\{\{\s*(\w+)\s*:(.*?)\}\}", sub, s)
 
 
 # ---------------------------------------------------------------------------------------------- inline runs

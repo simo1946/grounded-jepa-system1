@@ -1177,5 +1177,25 @@
   "seed": 0,
   "cluster": "evaluation episode",
   "level": 0.95
+ },
+ "provenance": {
+  "schema": "https://github.com/ASSERT-KTH/assert-research-agent/blob/main/schemas/provenance-v1.json",
+  "command": [
+   "python3",
+   "bench/lewm_suite/analyze_feedback.py",
+   "--runs",
+   "results/feedback_study/runs",
+   "--json"
+  ],
+  "cwd": ".",
+  "inputs": [
+   {
+    "path": "results/feedback_study/runs",
+    "sha256": "2017e22baa1ed4b36ff71f223d855806daa900f9e8cdebec1a935ed9f512d7e6"
+   }
+  ],
+  "commit": "23b5e9c3deb19ff8c27fb9f5a6f87047c85bfde4",
+  "now": "2026-11-13T02:44:36+00:00",
+  "osaudit": "0.7.0"
  }
 }

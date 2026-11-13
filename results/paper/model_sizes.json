@@ -41,5 +41,28 @@
  "official_gcidm": {
   "params": 1549317,
   "commit": "48c45b1cb2b34dd2c1c61d222c8309de567fde55"
+ },
+ "provenance": {
+  "schema": "https://github.com/ASSERT-KTH/assert-research-agent/blob/main/schemas/provenance-v1.json",
+  "command": [
+   "python3",
+   "bench/lewm_suite/model_sizes.py",
+   "--gcidm-repo",
+   "external/gcidm_repo"
+  ],
+  "cwd": ".",
+  "inputs": [
+   {
+    "path": "bench/lewm_suite/models.py",
+    "sha256": "b081d7a5eb8b0a12bb9425ed88aac12b75df850c451b2fa74063e2924f0f807e"
+   },
+   {
+    "path": "external/gcidm_repo/idm/model.py",
+    "sha256": "68dbfdd4b28cb6caf10824678b2a8d62865ba17a4070c5c7816dedcfdbcade40"
+   }
+  ],
+  "commit": "23b5e9c3deb19ff8c27fb9f5a6f87047c85bfde4",
+  "now": "2026-11-13T02:44:42+00:00",
+  "osaudit": "0.7.0"
  }
 }

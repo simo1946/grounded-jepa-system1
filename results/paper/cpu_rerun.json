@@ -1,0 +1,217 @@
+{
+ "random_standard": {
+  "solved": 36,
+  "pairs": 50,
+  "solved_at_start": 36
+ },
+ "replication": {
+  "C3_solved": 79,
+  "C2_solved": 67,
+  "pairs": 100,
+  "a_only": 16,
+  "b_only": 4,
+  "p_mcnemar": 0.01181793212890625,
+  "per_seed": {
+   "s0": {
+    "C3_solved": 39,
+    "C2_solved": 33,
+    "a_only": 8,
+    "b_only": 2,
+    "p_mcnemar": 0.109375
+   },
+   "s1": {
+    "C3_solved": 40,
+    "C2_solved": 34,
+    "a_only": 8,
+    "b_only": 2,
+    "p_mcnemar": 0.109375
+   }
+  }
+ },
+ "timing": {
+  "s1": {
+   "median_s": 0.024058125999545155,
+   "decisions": 5
+  },
+  "cem": {
+   "median_s": 15.08107401649977,
+   "decisions": 6
+  },
+  "ratio": 626.8598816377008,
+  "ratio_rounded": 630,
+  "robots": 1
+ },
+ "selection": {
+  "comparisons": 8,
+  "wins": 6,
+  "ties": 0,
+  "losses": 2,
+  "max_margin": 20,
+  "min_margin": -3,
+  "max_loss": 3,
+  "significant": 2,
+  "pairs": 50,
+  "widest": {
+   "C2": {
+    "model": "C2",
+    "std_scale": 2.0,
+    "world_model": 25,
+    "random": 14,
+    "a_only": 14,
+    "b_only": 3,
+    "p_mcnemar": 0.012725830078125
+   },
+   "C3": {
+    "model": "C3",
+    "std_scale": 2.0,
+    "world_model": 34,
+    "random": 14,
+    "a_only": 21,
+    "b_only": 1,
+    "p_mcnemar": 1.0967254638671875e-05
+   }
+  },
+  "near_mean": {
+   "C2": {
+    "model": "C2",
+    "std_scale": 0.25,
+    "world_model": 32,
+    "random": 35,
+    "a_only": 0,
+    "b_only": 3,
+    "p_mcnemar": 0.25
+   },
+   "C3": {
+    "model": "C3",
+    "std_scale": 0.25,
+    "world_model": 36,
+    "random": 38,
+    "a_only": 2,
+    "b_only": 4,
+    "p_mcnemar": 0.6875
+   }
+  },
+  "rows": [
+   {
+    "model": "C2",
+    "std_scale": 0.25,
+    "world_model": 32,
+    "random": 35,
+    "a_only": 0,
+    "b_only": 3,
+    "p_mcnemar": 0.25
+   },
+   {
+    "model": "C2",
+    "std_scale": 0.5,
+    "world_model": 33,
+    "random": 32,
+    "a_only": 5,
+    "b_only": 4,
+    "p_mcnemar": 1.0
+   },
+   {
+    "model": "C2",
+    "std_scale": 1.0,
+    "world_model": 27,
+    "random": 26,
+    "a_only": 8,
+    "b_only": 7,
+    "p_mcnemar": 1.0
+   },
+   {
+    "model": "C2",
+    "std_scale": 2.0,
+    "world_model": 25,
+    "random": 14,
+    "a_only": 14,
+    "b_only": 3,
+    "p_mcnemar": 0.012725830078125
+   },
+   {
+    "model": "C3",
+    "std_scale": 0.25,
+    "world_model": 36,
+    "random": 38,
+    "a_only": 2,
+    "b_only": 4,
+    "p_mcnemar": 0.6875
+   },
+   {
+    "model": "C3",
+    "std_scale": 0.5,
+    "world_model": 37,
+    "random": 36,
+    "a_only": 3,
+    "b_only": 2,
+    "p_mcnemar": 1.0
+   },
+   {
+    "model": "C3",
+    "std_scale": 1.0,
+    "world_model": 31,
+    "random": 24,
+    "a_only": 12,
+    "b_only": 5,
+    "p_mcnemar": 0.143463134765625
+   },
+   {
+    "model": "C3",
+    "std_scale": 2.0,
+    "world_model": 34,
+    "random": 14,
+    "a_only": 21,
+    "b_only": 1,
+    "p_mcnemar": 1.0967254638671875e-05
+   }
+  ]
+ },
+ "ceiling": {
+  "pairs": 50,
+  "mean_solved": 40,
+  "oracle_solved": 45,
+  "oracle_gain": 5,
+  "oracle_failed": 5,
+  "a_only": 5,
+  "b_only": 0,
+  "p_mcnemar": 0.0625,
+  "critic_solved": 32,
+  "critic_p": 0.021484375,
+  "random_solved": 28,
+  "world_model_solved": 31
+ },
+ "critic": {
+  "train_states": 2700,
+  "train_outcomes": 43200,
+  "spearman": 0.03442156862745098,
+  "heldout_states": 300
+ },
+ "verifier": {
+  "top1": 0.1728515625,
+  "spearman": 0.01943137254901961,
+  "select_solved": 28,
+  "select_p": 0.0018310546875,
+  "hard_solved": 34,
+  "retrieval_solved": 25,
+  "retrieval_p": 0.000274658203125
+ },
+ "provenance": {
+  "schema": "https://github.com/ASSERT-KTH/assert-research-agent/blob/main/schemas/provenance-v1.json",
+  "command": [
+   "python3",
+   "bench/lewm_suite/analyze_rerun.py",
+   "--runs",
+   "results/cpu_rerun"
+  ],
+  "cwd": ".",
+  "inputs": [
+   {
+    "path": "results/cpu_rerun",
+    "sha256": "2b274d63311ff778c75e9781090d9757ef885220e73bb0d3cea4519b1b65a70f"
+   }
+  ],
+  "commit": "23b5e9c3deb19ff8c27fb9f5a6f87047c85bfde4",
+  "now": "2026-11-13T02:44:41+00:00",
+  "osaudit": "0.7.0"
+ }
+}
