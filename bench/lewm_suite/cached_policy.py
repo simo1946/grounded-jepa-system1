@@ -32,7 +32,7 @@ def block_displacement_median(cache: dict) -> float:
     """Median squared latent displacement over one block (frameskip steps) within
     episodes: the verify-then-act gate's absolute threshold (tau_abs)."""
     fs, d = cache["frameskip"], []
-    for off, length in zip(cache["offsets"].tolist(), cache["lengths"].tolist()):
+    for off, length in zip(cache["offsets"].tolist(), cache["lengths"].tolist(), strict=True):
         z = cache["z"][off:off + length]
         if len(z) > fs:
             d.append((z[fs:] - z[:-fs]).square().sum(-1))
@@ -46,7 +46,7 @@ class OfflineWindows:
         self.c, fs = cache, cache["frameskip"]
         self.fs = fs
         starts = []
-        for off, length in zip(cache["offsets"].tolist(), cache["lengths"].tolist()):
+        for off, length in zip(cache["offsets"].tolist(), cache["lengths"].tolist(), strict=True):
             last = length - 1 - H * fs                       # frame rows up to start + H*fs must exist
             if last >= 0:
                 starts.append(torch.arange(off, off + last + 1))
@@ -167,7 +167,8 @@ def train(spec_str: str, seed: int, sensors: str, out: str, steps: int, init: st
             print(json.dumps(log[-1]), flush=True)
     meta = {"state_dict": {k: v.cpu() for k, v in pol.state_dict().items()}, "latent_dim": cache["z"].shape[1],
             "policy_type": policy_type, "flow_steps": getattr(pol, "n_steps", None),
-            "horizon": H, "action_dim": act_dim, "extra_dim": extra_dim, "tau_abs": tau_abs, "sensors": sspec.to_dict(), "sensor_stats": stats,
+            "horizon": H, "action_dim": act_dim, "extra_dim": extra_dim, "tau_abs": tau_abs,
+            "sensors": sspec.to_dict(), "sensor_stats": stats,
             "state_cols": cache["state_cols"], "object_cols": cache["object_cols"],
             "trained": {"steps": steps, "init": init, "experience": experience or [], "mix": mix,
                         "success_weight": success_weight, "lr": lr, "on_policy_episodes": len(exp),

@@ -25,7 +25,7 @@ from tasks import get_task  # noqa: E402
 
 
 def spearman(x: np.ndarray, y: np.ndarray) -> float:
-    from scipy.stats import spearmanr          # tie-aware (true k has many ties when pooled)
+    from scipy.stats import spearmanr  # tie-aware (true k has many ties when pooled)
     return float(spearmanr(x, y).statistic)
 
 

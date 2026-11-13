@@ -66,7 +66,7 @@ class GCIDM(nn.Module):
 def training_pairs(cache: dict) -> tuple[torch.Tensor, torch.Tensor]:
     """Rows t with at least one later frame in the same episode, and the largest horizon allowed per row."""
     rows, hmax = [], []
-    for off, length in zip(cache["offsets"].tolist(), cache["lengths"].tolist()):
+    for off, length in zip(cache["offsets"].tolist(), cache["lengths"].tolist(), strict=True):
         t = torch.arange(length - 1)
         rows.append(off + t)
         hmax.append((length - 1 - t).clamp(max=H_MAX))

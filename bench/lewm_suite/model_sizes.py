@@ -46,7 +46,6 @@ def world_models() -> dict:
 
 def policies() -> dict:
     from gcidm import GCIDM
-
     from hybrid_wm.control.latent_policy import ChunkPolicy
     d = TrainConfig().embed_dim
     s1 = ChunkPolicy(d, 5, 5 * ACTION_DIM)

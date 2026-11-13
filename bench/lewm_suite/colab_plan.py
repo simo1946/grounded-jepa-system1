@@ -120,7 +120,7 @@ def build(profile: str, tiers: list[int], only: list[str] | None, home: Path, wo
         parts = max(1, min(workers, n), math.ceil(n / P.get("part_size", 25)))
         per = [n // parts + (1 if i < n % parts else 0) for i in range(parts)]
         pnames = [f"{name}_p{i}" for i in range(parts)]
-        for i, (pn, k) in enumerate(zip(pnames, per)):
+        for i, (pn, k) in enumerate(zip(pnames, per, strict=True)):
             jobs.append(Job(f"collect:{pn}", [py, "collect.py", "--task", task, "--name", pn, "--episodes", str(k),
                                               "--seed", str(seed0 + i), "--num-envs", "1",
                                               "--img", os.environ.get("HWM_IMG_SIZE", "64")],

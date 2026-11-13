@@ -1,0 +1,58 @@
+{
+  "run": "cube/lewm/seed0",
+  "task": "cube",
+  "spec": "lewm",
+  "seed": 0,
+  "eval_seed": 42,
+  "controller": "cem",
+  "rho": null,
+  "k": null,
+  "cost": "mse",
+  "select": null,
+  "policy_file": null,
+  "receding": 5,
+  "exec_steps": null,
+  "camera_drop": 0.0,
+  "std_scale": 1.0,
+  "pool": null,
+  "pool_mode": null,
+  "fill": null,
+  "system12_stats": null,
+  "selector_file": null,
+  "num_eval": 3,
+  "env_chunk": 1,
+  "goal_offset": 25,
+  "eval_budget": 50,
+  "success_rate": 0.0,
+  "pairs": "nontrivial",
+  "trivial": [
+    0,
+    0,
+    0
+  ],
+  "nontrivial_success_rate": 0.0,
+  "successes": [
+    0,
+    0,
+    0
+  ],
+  "episodes_idx": [
+    7,
+    51,
+    61
+  ],
+  "start_steps": [
+    14,
+    3,
+    13
+  ],
+  "decision_seconds": {
+    "median": 15.08107401649977,
+    "p10": 14.572517361999871,
+    "p90": 15.314765308999995,
+    "calls": 6,
+    "envs_per_call": 1,
+    "device": "cpu"
+  },
+  "eval_minutes": 1.8
+}

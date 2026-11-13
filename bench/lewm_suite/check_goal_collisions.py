@@ -1,8 +1,9 @@
 """Check whether two evaluation pairs share an identical goal image.
 
-The camera-dropout memory in system12.py recognised an episode by its goal latent. Before the fix (reset per batch + a duplicate check), two pairs with identical goal
-images could have shared memory. This rebuilds the evaluation pairs exactly as evaluate.py does and reports
-any identical or near-identical goal frames. No duplicates means the camera-dropout results were not affected.
+The camera-dropout memory in system12.py recognised an episode by its goal latent. Before the fix (reset per batch + a
+duplicate check), two pairs with identical goal images could have shared memory. This rebuilds the evaluation pairs
+exactly as evaluate.py does and reports any identical or near-identical goal frames. No duplicates means the
+camera-dropout results were not affected.
 
 python check_goal_collisions.py --task cube --num-eval 60          # GPU study pairs
 """
@@ -29,7 +30,7 @@ def main(task_name: str, num_eval: int, goal_offset: int, eval_seed: int) -> dic
     eps, starts = pick_pairs(np.asarray(ds.lengths), goal_offset, num_eval, eval_seed, exclude)
     f = h5py.File(Path(HOME) / "datasets" / f"{task_name}_eval.h5", "r")
     off = f["ep_offset"][:]
-    rows = [int(off[e] + s + goal_offset) for e, s in zip(eps, starts)]
+    rows = [int(off[e] + s + goal_offset) for e, s in zip(eps, starts, strict=True)]
     goals = np.stack([f["pixels"][r] for r in rows]).astype(np.float32)
     n = len(goals)
     diff = np.full((n, n), np.inf)

@@ -22,7 +22,6 @@ CLIP_BLOCKS = 11
 
 
 def main(task_name: str, spec_str: str, seed: int, steps: int, data: str) -> None:
-    import stable_pretraining as spt
     import stable_worldmodel as swm
     from stable_pretraining import data as dt
 

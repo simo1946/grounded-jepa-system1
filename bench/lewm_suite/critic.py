@@ -80,7 +80,8 @@ def offline_eval(critic: OutcomeCritic, z: torch.Tensor, d: dict) -> dict:
            "spearman_informative": float(np.nanmean(sp[informative])) if informative.any() else float("nan")}
     for name, idx in (("mean_candidate", np.zeros(n, int)), ("critic_pick", pick), ("oracle_pick", real.argmin(1))):
         res[f"success_{name}"] = float(ok[np.arange(n), idx].mean())
-        res[f"success_{name}_informative"] = float(ok[np.arange(n), idx][informative].mean()) if informative.any() else float("nan")
+        picked = ok[np.arange(n), idx]
+        res[f"success_{name}_informative"] = float(picked[informative].mean()) if informative.any() else float("nan")
     res["success_random_candidate"] = float(ok[:, 1:].mean())
     return res
 

@@ -32,7 +32,7 @@ def pick_pairs(lengths, goal_offset: int, n: int, seed: int, exclude=None):
     pairs = [(ep, s) for ep, L in enumerate(lengths) for s in range(L) if s + goal_offset < L]
     if exclude is not None and pairs:
         drop = exclude([p[0] for p in pairs], [p[1] for p in pairs])
-        pairs = [p for p, d in zip(pairs, drop) if not d]
+        pairs = [p for p, d in zip(pairs, drop, strict=True) if not d]
     if len(pairs) < n:
         raise ValueError(f"only {len(pairs)} valid start states for {n} evaluations")
     rng = np.random.default_rng(seed)
@@ -238,9 +238,8 @@ def main(task_name: str, spec_str: str, seed: int, num_eval: int, eval_seed: int
             solver = LatentStepSolver(solver, lewm, short_chunk_act(HOME / "checkpoints" / run / policy_file,
                                                                     device))
         elif controller != "cem":
-            from system12 import GatedSolver
-
             from hybrid_wm.control.latent_policy import policy_from_checkpoint
+            from system12 import GatedSolver
             pk = torch.load(HOME / "checkpoints" / run / policy_file, map_location="cpu")
             if pk.get("policy_type") == "retrieval":           # contrastive retrieval over an expert menu
                 from contrastive_verifier import retrieval_from_checkpoint
@@ -335,7 +334,8 @@ def main(task_name: str, spec_str: str, seed: int, num_eval: int, eval_seed: int
               "select": select if controller != "cem" else None,
               "policy_file": policy_file if controller != "cem" else None,
               "receding": receding, "exec_steps": exec_steps or None, "camera_drop": camera_drop, "std_scale": std_scale,
-              "pool": [policy_file, *pool] if pool else None, "pool_mode": pool_mode if pool else None, "fill": fill if camera_drop else None,
+              "pool": [policy_file, *pool] if pool else None, "pool_mode": pool_mode if pool else None,
+              "fill": fill if camera_drop else None,
               "system12_stats": stats,
               "selector_file": critic_file if select in ("critic", "verifier") and controller != "cem" else None,
               "num_eval": num_eval, "env_chunk": chunk, "goal_offset": goal_offset, "eval_budget": budget,

@@ -91,7 +91,7 @@ def run(hold: int, n: int = 50, seed: int = 42) -> dict:
     rows = eval_pairs(n, seed)
     offs = np.asarray(ds.offsets)
     eps = [int(np.searchsorted(offs, r, side="right") - 1) for r in rows]
-    starts = [int(r - offs[e]) for r, e in zip(rows, eps)]
+    starts = [int(r - offs[e]) for r, e in zip(rows, eps, strict=True)]
     succ = []
     for lo in range(0, n, 5):
         world = swm.World(task.env_id, num_envs=len(eps[lo:lo + 5]), image_shape=(cfg.img_size, cfg.img_size),

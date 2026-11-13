@@ -17,10 +17,11 @@ import json
 from pathlib import Path
 
 import numpy as np
+from scipy.stats import binomtest
+
 from cluster_bootstrap import cluster_bootstrap, holm
 from evaluate import result_path
 from models import HOME
-from scipy.stats import binomtest
 
 MODELS = [("lewm", 0), ("lewm", 1), ("lewm+idm+sa+obj", 0), ("lewm+idm+sa+obj", 1)]
 NAMES = {"lewm": "C1", "lewm+idm+sa+obj": "C3"}

@@ -43,6 +43,7 @@ _W = {}
 def _init_worker(data: str):
     import gymnasium as gym
     import stable_worldmodel  # noqa: F401
+
     from tasks import apply_render_profile, get_task
     task = get_task("cube", 64)
     apply_render_profile(task)
@@ -71,7 +72,7 @@ def _execute(goal_pos, raw):
 def _phase1(job):
     rows, goals, raw = job
     u, out = _W["u"], []
-    for r, g, a in zip(rows, goals, raw):
+    for r, g, a in zip(rows, goals, raw, strict=True):
         u.set_state(_W["qpos"][r], _W["qvel"][r])
         u._data.ctrl[:] = _W["ctrl"][r]
         d, ok, gr, _ = _execute(_W["bp"][g], a)
@@ -83,7 +84,7 @@ def _phase1(job):
 def _phase2(job):
     states, goals, raw = job
     u, out = _W["u"], []
-    for (q, v, c), g, a in zip(states, goals, raw):
+    for (q, v, c), g, a in zip(states, goals, raw, strict=True):
         u.set_state(q, v)
         u._data.ctrl[:] = c
         d, ok, gr, _ = _execute(_W["bp"][g], a)
@@ -146,10 +147,12 @@ class Practice:
         raw1 = self.to_raw(ch1)
         parts = _split(n, 2 * self.workers)
         res1 = sum(self.pool.map(_phase1, [(r[p].numpy(), g[p].numpy(), raw1[p]) for p in parts]), [])
-        d1 = torch.tensor([x[0] for x in res1]); ok1 = torch.tensor([x[1] for x in res1]); gr1 = torch.tensor([x[2] for x in res1])
+        d1 = torch.tensor([x[0] for x in res1])
+        ok1 = torch.tensor([x[1] for x in res1])
+        gr1 = torch.tensor([x[2] for x in res1])
         live = torch.nonzero(~ok1).squeeze(-1)
         d2, ok2, gr2 = d1.clone(), torch.zeros(n, dtype=torch.bool), torch.zeros(n, dtype=torch.bool)
-        c2 = torch.zeros_like(c1); lp2 = torch.zeros(n); z1 = torch.zeros_like(z0)
+        c2, lp2, z1 = torch.zeros_like(c1), torch.zeros(n), torch.zeros_like(z0)
         if len(live):
             z1[live] = self.encode([res1[i][3] for i in live.tolist()])
             with torch.no_grad():
@@ -210,9 +213,9 @@ def main(reward: str, out: str, spec: str = "lewm+idm+sa+obj", base: str = "poli
         G1, G2 = returns(ep, reward)
         a1 = group_adv(G1, torch.ones_like(G1, dtype=torch.bool), group)
         a2 = group_adv(G2, ep["live"], group)
-        zs = torch.cat([ep["z0"], ep["z1"]]); zgs = torch.cat([ep["zg"], ep["zg"]])
-        cs = torch.cat([ep["c1"], ep["c2"]]); olp = torch.cat([ep["lp1"], ep["lp2"]])
-        adv = torch.cat([a1, a2]); keep = torch.cat([torch.ones_like(ep["live"]), ep["live"]])
+        zs, zgs = torch.cat([ep["z0"], ep["z1"]]), torch.cat([ep["zg"], ep["zg"]])
+        cs, olp = torch.cat([ep["c1"], ep["c2"]]), torch.cat([ep["lp1"], ep["lp2"]])
+        adv, keep = torch.cat([a1, a2]), torch.cat([torch.ones_like(ep["live"]), ep["live"]])
         zs, zgs, cs, olp, adv = zs[keep], zgs[keep], cs[keep], olp[keep], adv[keep]
         for _ in range(epochs):
             mu = res.correction(zs, zgs)

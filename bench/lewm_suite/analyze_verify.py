@@ -23,8 +23,8 @@ def load(spec: str, ctrl: str):
 
 def mcnemar(a, b):
     """Exact two-sided McNemar on paired 0/1 outcomes; returns (wins_a, wins_b, p)."""
-    wa = sum(x and not y for x, y in zip(a, b))
-    wb = sum(y and not x for x, y in zip(a, b))
+    wa = sum(x and not y for x, y in zip(a, b, strict=True))
+    wb = sum(y and not x for x, y in zip(a, b, strict=True))
     return wa, wb, (binomtest(wa, wa + wb, 0.5).pvalue if wa + wb else 1.0)
 
 

@@ -48,7 +48,7 @@ def _init_worker(data: str):
 def _run(job):
     rows, goals, raw = job
     out = np.zeros(len(rows), dtype=np.float32)
-    for i, (r, g) in enumerate(zip(rows, goals)):
+    for i, (r, g) in enumerate(zip(rows, goals, strict=True)):
         pos, _ = _W["sim"].execute(_W["qpos"][r], _W["qvel"][r], _W["ctrl"][r], raw[i])
         out[i] = np.linalg.norm(pos - _W["bp"][g])
     return out
@@ -118,7 +118,8 @@ def main(spec_str: str, base_file: str, reward: str, out: str, iters: int = 120,
     with torch.no_grad():
         vbase = res.base_chunk(z[vr], z[vg])
     d_base = real_distances(pool, vr.numpy(), vg.numpy(), to_raw(vbase), workers)
-    print(json.dumps({"val_base_success": float((d_base <= SUCCESS_M).mean()), "val_base_dist": float(d_base.mean())}), flush=True)
+    print(json.dumps({"val_base_success": float((d_base <= SUCCESS_M).mean()),
+                      "val_base_dist": float(d_base.mean())}), flush=True)
     for it in range(1, iters + 1):
         r, gl = contexts(ctx, g)
         zt, zg = z[r], z[gl]

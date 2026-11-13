@@ -7,12 +7,12 @@ import multiprocessing as mp
 import h5py
 import torch
 
+import residual_rl as rr
 from cached_policy import H, OfflineWindows
 from hybrid_wm.control.latent_policy import policy_from_checkpoint
 from latent_cache import cache_path
 from models import HOME
 from oracle_policy import action_scaler
-import residual_rl as rr
 
 S = "lewm+idm+sa+obj"
 ck = HOME / "checkpoints" / f"cube/{S}/seed0"

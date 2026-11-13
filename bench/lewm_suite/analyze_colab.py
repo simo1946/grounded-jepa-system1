@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 
 import numpy as np
+
 from cluster_bootstrap import cluster_bootstrap
 
 HERE = Path(__file__).resolve().parent
@@ -22,14 +23,16 @@ NAMES = {
     "C5": "hybrid + object", "C6": "+ object + ARL", "C7": "hybrid + object + ARL", "C8": "IDM only",
     "C9": "+ object, MobileNetV4-S",
 }
-EVAL_ORDER = ["s1_all", "cem_all", "s1_nt", "s1_pk", "s1f_nt", "s1f_pk", "s1_50", "hier_nt", "hier_pk", "hier_50", "sel16", "sel16n", "gate", "cem", "rec1",
+EVAL_ORDER = ["s1_all", "cem_all", "s1_nt", "s1_pk", "s1f_nt", "s1f_pk", "s1_50", "hier_nt", "hier_pk", "hier_50",
+              "sel16", "sel16n", "gate", "cem", "rec1",
               "cam0.5-blank", "cam0.5-hold", "cam0.5-predict", "cam0.8-hold", "cam0.8-predict"]
 EVAL_TITLES = {
     "s1_all": "System 1, all pairs (authors' protocol)", "cem_all": "CEM planner, all pairs (authors' protocol)",
     "s1_nt": "System 1, non-trivial +25", "s1_pk": "System 1, grasp windows",
     "s1f_nt": "flow System 1, non-trivial +25", "s1f_pk": "flow System 1, grasp windows", "s1_50": "System 1, non-trivial +50",
     "hier_nt": "two-level, non-trivial +25", "hier_pk": "two-level, grasp windows", "hier_50": "two-level, +50",
-    "sel16": "best-of-16 by world model", "sel16n": "best-of-16, candidates near the mean (std x 0.25)", "gate": "verify-then-act (CEM fallback)", "cem": "CEM planner",
+    "sel16": "best-of-16 by world model", "sel16n": "best-of-16, candidates near the mean (std x 0.25)",
+    "gate": "verify-then-act (CEM fallback)", "cem": "CEM planner",
     "rec1": "System 1, replan every block", "cam0.5-blank": "camera 50% off, blank",
     "cam0.5-hold": "camera 50% off, hold last", "cam0.5-predict": "camera 50% off, world-model prediction",
     "cam0.8-hold": "camera 80% off, hold last", "cam0.8-predict": "camera 80% off, world-model prediction",
@@ -42,7 +45,7 @@ def mcnemar_exact(a, b) -> dict:
     n = n10 + n01
     if n == 0:
         return {"a_only": 0, "b_only": 0, "p": 1.0}
-    from scipy.stats import binomtest                     # exact; stable for large discordant counts
+    from scipy.stats import binomtest  # exact; stable for large discordant counts
     p = float(binomtest(min(n10, n01), n, 0.5).pvalue)
     return {"a_only": n10, "b_only": n01, "p": p}
 
@@ -224,9 +227,9 @@ def contrasts(res: dict) -> tuple[list[dict], str]:
     did = verification_did_rows(res)
     out += did
     prim = [r for r in out if r["primary"]]
-    for r, ph in zip(prim, holm([r["p"] for r in prim])):
+    for r, ph in zip(prim, holm([r["p"] for r in prim]), strict=True):
         r["p_holm"] = ph
-    for r, ph in zip(prim, holm([r.get("p_boot", r["p"]) for r in prim])):
+    for r, ph in zip(prim, holm([r.get("p_boot", r["p"]) for r in prim]), strict=True):
         r["p_boot_holm"] = ph
     md = ["| contrast | eval | A | B | units | A − B (pts) | 95% CI (pair bootstrap) | A-only | B-only | p | "
           "p (Holm, primary) | p boot (Holm, primary) |",
@@ -321,7 +324,7 @@ def fig_success(rows: list[dict], cfgs: list[str], path: Path) -> None:
     import matplotlib.pyplot as plt
     evs = [("s1_nt", "Non-trivial pairs, goal +25"), ("s1_pk", "Grasp-centred windows (H-JEPA protocol)")]
     fig, axes = plt.subplots(1, 2, figsize=(10, 0.42 * len(cfgs) + 1.4), sharey=True)
-    for ax, (e, title) in zip(axes, evs):
+    for ax, (e, title) in zip(axes, evs, strict=True):
         _style(ax)
         for i, c in enumerate(cfgs):
             r = next((x for x in rows if x["config"] == c and x["eval"] == e), None)

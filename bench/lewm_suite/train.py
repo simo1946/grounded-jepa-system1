@@ -126,7 +126,9 @@ def main(task_name: str, spec_str: str, seed: int, steps: int, device: str, data
     src = resume if resume.exists() else (legacy if legacy.exists() else None)
     if src is not None:
         st = torch.load(src, map_location="cpu", weights_only=False)
-        model.load_state_dict(st["model"]); opt.load_state_dict(st["opt"]); sched.load_state_dict(st["sched"])
+        model.load_state_dict(st["model"])
+        opt.load_state_dict(st["opt"])
+        sched.load_state_dict(st["sched"])
         step, log = st["step"], st["log"]
         torch.set_rng_state(st["rng"])
         info["resumed_at_steps"] = st.get("resumed_at_steps", []) + [step]   # provenance: a resumed run is

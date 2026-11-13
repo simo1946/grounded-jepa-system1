@@ -32,7 +32,7 @@ def merge(out: str, parts: list[str], delete_parts: bool = False) -> dict:
     srcs = [h5py.File(p, "r") for p in paths]
     try:
         cols = sorted(k for k in srcs[0].keys() if k not in EPISODE_COLS)
-        for f, p in zip(srcs[1:], paths[1:]):
+        for f, p in zip(srcs[1:], paths[1:], strict=True):
             other = sorted(k for k in f.keys() if k not in EPISODE_COLS)
             if other != cols:
                 raise ValueError(f"{p.name}: columns differ from {paths[0].name}")
@@ -40,7 +40,7 @@ def merge(out: str, parts: list[str], delete_parts: bool = False) -> dict:
                 if f[c].dtype != srcs[0][c].dtype or f[c].shape[1:] != srcs[0][c].shape[1:]:
                     raise ValueError(f"{p.name}: column {c!r} has a different dtype or row shape")
         rows = [int(f["ep_len"][:].sum()) for f in srcs]
-        for f, r, p in zip(srcs, rows, paths):
+        for f, r, p in zip(srcs, rows, paths, strict=True):
             for c in cols:
                 if f[c].shape[0] != r:
                     raise ValueError(f"{p.name}: column {c!r} has {f[c].shape[0]} rows, episodes sum to {r}")

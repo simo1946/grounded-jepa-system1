@@ -32,7 +32,7 @@ def main(n: int, part: int, seed: int, data: str = "cube") -> None:
         off, L = f["ep_offset"][:], f["ep_len"][:]
         qpos, qvel, ctrl = f["qpos"][:], f["qvel"][:], f["control"][:]
         bp, by = f["privileged_block_0_pos"][:], f["privileged_block_0_yaw"][:]
-    starts = np.concatenate([o + np.arange(l - H * FS) for o, l in zip(off, L) if l > H * FS])
+    starts = np.concatenate([o + np.arange(l - H * FS) for o, l in zip(off, L, strict=True) if l > H * FS])
     rng = np.random.default_rng(1000 + seed)
     r = np.sort(rng.choice(starts, n, replace=False))
     k = rng.integers(1, H + 1, n)

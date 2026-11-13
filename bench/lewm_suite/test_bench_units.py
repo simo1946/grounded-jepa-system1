@@ -56,7 +56,7 @@ def _episode(F, success, D=4):
 
 
 def test_experience_semantics():
-    from cached_policy import H, Experience
+    from cached_policy import Experience, H
     g = torch.Generator().manual_seed(0)
     exp = Experience([_episode(4, False), _episode(1, False), _episode(3, True)])
     assert len(exp) == 2                                             # 1-frame failure has no transition
@@ -93,6 +93,7 @@ def test_block_actions_row_major():
 
 def test_camera_dropout_fill():
     import types
+
     from system12 import GatedSolver
 
     class L(torch.nn.Module):
@@ -147,6 +148,7 @@ def test_surprise_handles_success_and_failure_episodes():
 
 def test_merge_h5_concatenates_and_rebuilds_offsets(tmp_path, monkeypatch):
     import h5py
+
     import merge_h5
 
     (tmp_path / "datasets").mkdir()
@@ -180,8 +182,9 @@ def test_training_losses_every_spec_path():
     from models import HOME, Spec, TrainConfig, build_model, state_columns
     if not (HOME / "datasets" / "cube.h5").exists():
         pytest.skip("needs the cube dataset")
-    import train
     from stable_worldmodel.wm.loss import SIGReg
+
+    import train
     from tasks import get_task
 
     cfg, task = TrainConfig(), get_task("cube", TrainConfig().img_size)
@@ -200,6 +203,7 @@ def test_plan_runner_backs_up_and_restores_parts(tmp_path):
     """A finished part is copied to the backup folder; a later run restores it instead of
     re-running the job, and only missing parts run."""
     import sys
+
     from colab_plan import Job, run
     out, bak = tmp_path / "data", tmp_path / "drive"
     mk = lambda i: Job(f"collect:p{i}", [sys.executable, "-c",  # noqa: E731
@@ -222,6 +226,7 @@ def test_plan_runner_backs_up_and_restores_parts(tmp_path):
 
 def test_plan_collection_parts_are_small():
     from pathlib import Path
+
     from colab_plan import build
     jobs = build("free", [1], None, Path("/tmp/plan_parts_check"), workers=2)
     cube = [j for j in jobs if j.name.startswith("collect:cube_p")]
@@ -236,12 +241,14 @@ def test_vectorised_cube_oracle_matches_ogbench():
     """oracle.cube_oracle == CubeMarkovOracle.select_action on real dataset states, toward
     random targets (final pose pinned to the current effector pose in both)."""
     import types
+
     from models import HOME
     path = HOME / "datasets" / "cube_eval.h5"
     if not path.exists():
         pytest.skip("needs the cube_eval dataset")
     import h5py
     from ogbench.manipspace.oracles.markov.cube_markov import CubeMarkovOracle
+
     from oracle import ORACLE_COLS, cube_oracle
     rng = np.random.default_rng(0)
     with h5py.File(path, "r") as f:
@@ -278,6 +285,7 @@ def test_oracle_sim_chunk_replays_open_loop():
     if not path.exists():
         pytest.skip("needs the cube_eval dataset")
     import h5py
+
     from oracle_sim import OracleSim
     with h5py.File(path, "r") as f:
         r, g = 300, 320
@@ -298,6 +306,7 @@ def test_oracle_sim_chunk_replays_open_loop():
 def test_scorer_selection_picks_lowest_score():
     """select='scorer': the solver executes the candidate with the lowest external score, with no rollout."""
     import types
+
     from system12 import GatedSolver
 
     class L(torch.nn.Module):
@@ -325,6 +334,7 @@ def test_scorer_selection_picks_lowest_score():
 
 def test_plan_other_environments():
     from pathlib import Path
+
     from colab_plan import CONFIGS, build
     tw = build("free", [1], None, Path("/tmp/plan_tw_check"), workers=2, task="tworoom")
     names = {j.name for j in tw}
@@ -350,6 +360,7 @@ def test_plan_detects_outputs_of_a_lost_and_retrained_model(tmp_path):
     """Weights lost from cloud storage and retrained: policies and results built from the old weights must
     re-run (and be kept aside, not deleted); a normal finished model must stay done."""
     import os
+
     from colab_plan import STALE_TOLERANCE_S, build
     home = tmp_path / "home"
     jobs = {j.name: j for j in build("free", [2], ["C2"], home, workers=2)}
@@ -377,6 +388,7 @@ def test_plan_detects_outputs_of_a_lost_and_retrained_model(tmp_path):
 
 def test_plan_warns_but_never_stops_on_low_storage(tmp_path, monkeypatch):
     import shutil
+
     import colab_plan
     (tmp_path / "checkpoints").mkdir()
     Usage = type(shutil.disk_usage(tmp_path))
@@ -390,6 +402,7 @@ def test_plan_warns_but_never_stops_on_low_storage(tmp_path, monkeypatch):
 
 def test_plan_rejects_unreadable_trained_weights(tmp_path):
     import torch
+
     from colab_plan import Job, verify_output
     w = tmp_path / "weights.pt"
     torch.save({"a": torch.zeros(2)}, w)
@@ -404,6 +417,7 @@ def test_contrastive_verifier_learns_and_retrieves():
     """InfoNCE on a toy where the right chunk is a fixed function of (z, z_goal): the verifier must rank the
     true chunk first, prefer it over a perturbed copy, and the retrieval policy must return it from a menu."""
     import torch
+
     from contrastive_verifier import ContrastiveVerifier, RetrievalPolicy, info_nce
     torch.manual_seed(0)
     D, Hb, A = 8, 5, 4
@@ -415,7 +429,9 @@ def test_contrastive_verifier_learns_and_retrieves():
     for _ in range(300):
         z, zg = torch.randn(256, D), torch.randn(256, D)
         loss = info_nce(v, z, zg, make(z, zg), 2, g)
-        opt.zero_grad(); loss.backward(); opt.step()
+        opt.zero_grad()
+        loss.backward()
+        opt.step()
     z, zg = torch.randn(64, D), torch.randn(64, D)
     true = make(z, zg)
     cand = torch.stack([true, true + 0.5 * torch.randn_like(true)], 1)          # [64, 2, H, A]
@@ -466,6 +482,7 @@ class _CountingSolver:
 def test_step_policy_executes_only_the_first_steps(exec_steps, receding):
     import stable_worldmodel as swm
     from stable_worldmodel.policy import WorldModelPolicy
+
     from gcidm import step_policy
     solver = _CountingSolver()
     pol = step_policy(WorldModelPolicy)(solver=solver, exec_steps=exec_steps,
@@ -518,6 +535,7 @@ def test_short_chunk_batch_targets_and_goals():
 
 def test_latent_step_solver_pads_the_chunk():
     import gymnasium as gym
+
     from gcidm import LatentStepSolver
 
     class Enc(torch.nn.Module):
@@ -574,6 +592,7 @@ def test_cluster_bootstrap_basic_cases():
 def test_trivial_share_counts_and_lewm_draw(tmp_path):
     h5py = pytest.importorskip("h5py")
     import numpy as np
+
     from trivial_share import lewm_eval_draw, summary, valid_starts
     # two episodes of 30 steps; the cube moves 0.1 m at step 10 of episode 0 and never in episode 1
     ep = np.repeat([0, 1], 30)

@@ -61,6 +61,7 @@ def test_sample_first_candidate_is_mean_and_nan_targets_masked():
 
 def test_policy_pool_select_and_mean():
     import pytest
+
     from hybrid_wm.control.latent_policy import PolicyPool
     torch.manual_seed(0)
     members = [ChunkPolicy(8, 5, 4) for _ in range(3)]

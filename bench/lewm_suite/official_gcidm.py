@@ -62,7 +62,7 @@ def export(spec_str: str, seed: int, task: str = "cube") -> Path:
     if not np.allclose(std[ok], cached[ok], atol=1e-4):             # same rows, same order as the cache
         raise RuntimeError("raw actions do not match the cached (standardised) actions")
     ep = np.zeros(len(raw), dtype=np.int64)
-    for i, (off, length) in enumerate(zip(cache["offsets"].tolist(), cache["lengths"].tolist())):
+    for i, (off, length) in enumerate(zip(cache["offsets"].tolist(), cache["lengths"].tolist(), strict=True)):
         ep[off:off + length] = i
     out = npz_path(spec.name(), seed, task)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -106,7 +106,7 @@ def official_act(path: Path, budget: int, action_scaler, device: str | torch.dev
     check_repo(repo)
     if str(repo) not in sys.path:
         sys.path.insert(0, str(repo))
-    from train_idm import load_idm                       # the authors' loader, from their repository
+    from train_idm import load_idm  # the authors' loader, from their repository
     idm = load_idm(str(path), device=str(device))
     mean = torch.as_tensor(action_scaler.mean_, dtype=torch.float32, device=device)
     scale = torch.as_tensor(action_scaler.scale_, dtype=torch.float32, device=device)

@@ -127,7 +127,7 @@ def pickup_candidates(dataset, goal_offset: int, height_delta: float = 0.02, con
     contact = np.asarray(dataset.get_col_data("proprio_gripper_contact"))
     contact = contact[:, 0] if contact.ndim == 2 else contact
     eps, starts, mid = [], [], goal_offset // 2
-    for ep, (off, length) in enumerate(zip(np.asarray(dataset.offsets), np.asarray(dataset.lengths))):
+    for ep, (off, length) in enumerate(zip(np.asarray(dataset.offsets), np.asarray(dataset.lengths), strict=True)):
         if length < goal_offset:
             continue
         z = pos[off:off + length, 2]

@@ -101,8 +101,12 @@ def main(folder: Path) -> dict:
             comps.append({"model": tag, "std_scale": s, "world_model": solved(wm), "random": solved(rnd),
                           **mcnemar(wm, rnd)})
     margins = [c["world_model"] - c["random"] for c in comps]
+    by = {(c["model"], c["std_scale"]): c for c in comps}
     out["selection"] = {"comparisons": len(comps), "wins": sum(m > 0 for m in margins), "ties": sum(m == 0 for m in margins),
-                        "max_margin": max(margins), "min_margin": min(margins), "pairs": 50, "rows": comps}
+                        "losses": sum(m < 0 for m in margins), "max_margin": max(margins), "min_margin": min(margins),
+                        "max_loss": max(0, -min(margins)), "significant": sum(c["p_mcnemar"] < 0.05 for c in comps),
+                        "pairs": 50, "widest": {t: by[(t, 2.0)] for t in ("C2", "C3")},
+                        "near_mean": {t: by[(t, 0.25)] for t in ("C2", "C3")}, "rows": comps}
 
     mean = R.one(**nontrivial(spec=O, seed=0, controller="s1", k=1, num_eval=50, policy_file="policy_gauss6k.pt"))
     sel = {m: R.one(**nontrivial(spec=O, seed=0, controller="s1", k=K, num_eval=50, policy_file="policy_gauss6k.pt",
@@ -111,15 +115,16 @@ def main(folder: Path) -> dict:
                       "oracle_gain": solved(sel["oracle"]) - solved(mean),
                       "oracle_failed": len(mean["successes"]) - solved(sel["oracle"]),
                       **mcnemar(sel["oracle"], mean),
-                      "critic_solved": solved(sel["critic"]), "random_solved": solved(sel["random"]),
+                      "critic_solved": solved(sel["critic"]), "critic_p": mcnemar(sel["critic"], mean)["p_mcnemar"],
+                      "random_solved": solved(sel["random"]),
                       "world_model_solved": solved(sel["cost"])}
 
-    crit = R.named("critic__lewm_idm_sa_obj__seed0.json")
+    crit = R.named(f"critic__{O}__seed0.json")
     out["critic"] = {"train_states": crit["train_states"], "train_outcomes": crit["train_states"] * K,
                      "spearman": crit["heldout_eval_set"]["spearman_mean"],
                      "heldout_states": crit["heldout_eval_set"]["states"]}
 
-    vin = R.named("verifier__lewm_idm_sa_obj__seed0__verifier_in.json")["offline"]
+    vin = R.named(f"verifier__{O}__seed0__verifier_in.json")["offline"]
     vsel = R.one(**nontrivial(spec=O, seed=0, controller="s1", k=K, num_eval=50, policy_file="policy_gauss6k.pt",
                               select="verifier", selector_file="verifier_in.pt"))
     vhard = R.one(**nontrivial(spec=O, seed=0, controller="s1", k=K, num_eval=50, policy_file="policy_gauss6k.pt",

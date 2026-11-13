@@ -31,7 +31,7 @@ H = 5
 
 def windows(cache: dict, n_blocks: int) -> torch.Tensor:
     fs, out = cache["frameskip"], []
-    for off, length in zip(cache["offsets"].tolist(), cache["lengths"].tolist()):
+    for off, length in zip(cache["offsets"].tolist(), cache["lengths"].tolist(), strict=True):
         last = length - 1 - n_blocks * fs
         if last >= 0:
             out.append(torch.arange(off, off + last + 1))
@@ -46,8 +46,8 @@ def batch(cache, starts, n, g):
 
 @torch.no_grad()
 def horizon_displacement_median(cache: dict) -> float:
-    fs, k, d = cache["frameskip"], H * cache["frameskip"], []
-    for off, length in zip(cache["offsets"].tolist(), cache["lengths"].tolist()):
+    k, d = H * cache["frameskip"], []
+    for off, length in zip(cache["offsets"].tolist(), cache["lengths"].tolist(), strict=True):
         z = cache["z"][off:off + length]
         if len(z) > k:
             d.append((z[k:] - z[:-k]).square().sum(-1))

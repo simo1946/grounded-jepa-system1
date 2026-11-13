@@ -21,8 +21,8 @@ def load(spec, ctrl):
 
 
 def mcnemar(a, b):
-    wa = sum(x and not y for x, y in zip(a, b))
-    wb = sum(y and not x for x, y in zip(a, b))
+    wa = sum(x and not y for x, y in zip(a, b, strict=True))
+    wb = sum(y and not x for x, y in zip(a, b, strict=True))
     return {"a": sum(a), "b": sum(b), "a_only": wa, "b_only": wb,
             "p": binomtest(wa, wa + wb, 0.5).pvalue if wa + wb else 1.0}
 

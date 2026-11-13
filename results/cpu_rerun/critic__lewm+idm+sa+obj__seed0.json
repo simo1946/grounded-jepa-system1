@@ -1,0 +1,74 @@
+{
+ "train_states": 2700,
+ "log": [
+  {
+   "step": 500,
+   "loss": 0.164,
+   "val_spearman": 0.008,
+   "val_success_critic": 0.783,
+   "min": 0.27
+  },
+  {
+   "step": 1000,
+   "loss": 0.1113,
+   "val_spearman": 0.035,
+   "val_success_critic": 0.79,
+   "min": 0.55
+  },
+  {
+   "step": 1500,
+   "loss": 0.0502,
+   "val_spearman": 0.03,
+   "val_success_critic": 0.793,
+   "min": 0.83
+  },
+  {
+   "step": 2000,
+   "loss": 0.053,
+   "val_spearman": 0.035,
+   "val_success_critic": 0.78,
+   "min": 1.1
+  },
+  {
+   "step": 2500,
+   "loss": 0.0131,
+   "val_spearman": 0.028,
+   "val_success_critic": 0.783,
+   "min": 1.38
+  },
+  {
+   "step": 3000,
+   "loss": 0.0047,
+   "val_spearman": 0.039,
+   "val_success_critic": 0.78,
+   "min": 1.67
+  },
+  {
+   "step": 3500,
+   "loss": 0.0025,
+   "val_spearman": 0.04,
+   "val_success_critic": 0.783,
+   "min": 1.94
+  },
+  {
+   "step": 4000,
+   "loss": 0.0024,
+   "val_spearman": 0.04,
+   "val_success_critic": 0.777,
+   "min": 2.21
+  }
+ ],
+ "heldout_eval_set": {
+  "states": 300,
+  "informative_states": 65,
+  "spearman_mean": 0.03442156862745098,
+  "spearman_informative": 0.11565610859728505,
+  "success_mean_candidate": 0.8666666666666667,
+  "success_mean_candidate_informative": 0.7230769230769231,
+  "success_critic_pick": 0.82,
+  "success_critic_pick_informative": 0.5076923076923077,
+  "success_oracle_pick": 0.9266666666666666,
+  "success_oracle_pick_informative": 1.0,
+  "success_random_candidate": 0.7866666666666666
+ }
+}

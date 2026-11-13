@@ -52,16 +52,24 @@ def test_gradients_reach_the_encoder_side():
 def test_state_alignment_targets_level_and_delta():
     """With a perfect head the loss is zero only if both s_{t+1} and s_{t+1}-s_t are right."""
     head = StateAlignmentHead(4, 2, hidden=8)
-    state = torch.randn(1, 3, 2)
+    state, emb = torch.randn(1, 3, 2), torch.randn(1, 3, 4)
     with torch.no_grad():
         s_hat, ds_hat = head(torch.zeros(1, 2, 4), torch.zeros(1, 2, 4))
     assert s_hat.shape == ds_hat.shape == (1, 2, 2)
+    level, delta = state[:, 1:], state[:, 1:] - state[:, :-1]
+    head.forward = lambda z_t, z_next: (level, delta)                        # a perfect head
+    assert head.loss(emb, state).item() == pytest.approx(0.0, abs=1e-12)
+    head.forward = lambda z_t, z_next: (level, torch.zeros_like(delta))      # right level, wrong delta
+    assert head.loss(emb, state).item() > 0
+    head.forward = lambda z_t, z_next: (torch.zeros_like(level), delta)      # wrong level, right delta
+    assert head.loss(emb, state).item() > 0
     with pytest.raises(ValueError):
         head.loss(torch.randn(1, 3, 4), torch.randn(1, 2, 2))
 
 
 def test_action_resolution_loss_rewards_action_sensitive_predictors():
     import torch
+
     from hybrid_wm.grounding import action_resolution_loss, perturb_actions
 
     torch.manual_seed(0)
@@ -83,6 +91,7 @@ def test_action_resolution_loss_rewards_action_sensitive_predictors():
 def test_action_resolution_loss_is_bounded():
     """Perturbed predictions already (1 + gamma) farther get no gradient (no runaway inflation)."""
     import torch
+
     from hybrid_wm.grounding import action_resolution_loss
 
     target = torch.zeros(4, 3, 8)
@@ -97,6 +106,7 @@ def test_action_resolution_loss_is_bounded():
 
 def test_action_resolution_loss_gradient_reaches_predictor():
     import torch
+
     from hybrid_wm.grounding import action_resolution_loss, perturb_actions
 
     W = torch.zeros(5, 8, requires_grad=True)

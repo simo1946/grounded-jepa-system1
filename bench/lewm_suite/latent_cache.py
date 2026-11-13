@@ -93,8 +93,8 @@ def main(spec_str: str, seed: int, data: str, verify: bool = True, device: str =
            "state_cols": list(task.state_cols), "object_cols": list(task.object_cols)}
 
     if verify:   # the cache must reproduce the training loader's latents and action blocks exactly
-        from stable_pretraining import data as dt2
         import stable_pretraining as spt
+        from stable_pretraining import data as dt2
         from stable_worldmodel.data import column_normalizer
         chk = swm.data.HDF5Dataset(data, cache_dir=str(HOME), num_steps=2, frameskip=cfg.frameskip,
                                    keys_to_load=["pixels", "action"], keys_to_cache=["action"])

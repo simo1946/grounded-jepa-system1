@@ -99,12 +99,13 @@ def finish_episodes(envs: list[dict], successes) -> list[dict]:
     policy, so A = F; otherwise the last action's outcome is unobserved and
     is dropped (A = F - 1)."""
     out = []
-    for rec, ok in zip(envs, successes):
+    for rec, ok in zip(envs, successes, strict=True):
         F = len(rec["z"])
         A = F if ok else F - 1
         if F < 1 or A < 1:
             continue
-        st = lambda key, n: torch.stack(rec[key][:n])  # noqa: E731
+        def st(key: str, n: int, rec: dict = rec) -> torch.Tensor:
+            return torch.stack(rec[key][:n])
         out.append({"z": st("z", F), "action": st("action", A), "proprio": st("proprio", F),
                     "object": st("object", F), "z_goal": rec["z_goal"].float(), "goal_obj": rec["goal_obj"].float(),
                     "success": bool(ok), "reached_block": A if ok else -1})
@@ -165,7 +166,7 @@ def collect(lewm, policy_meta, task, cfg, n_episodes: int, seed: int, std_scale:
                            goal_offset=task.goal_offset, eval_budget=task.eval_budget, callables=task.eval_callables)
         world.close()
         episodes += finish_episodes(rec.envs, np.asarray(m["episode_successes"]).astype(bool).tolist())
-    return episodes, {"pairs": list(zip(eps, starts))}
+    return episodes, {"pairs": list(zip(eps, starts, strict=True))}
 
 
 def main(spec_str: str, seed: int, rounds: int, n_episodes: int, steps: int, std_scale: float) -> None:

@@ -143,7 +143,7 @@ def collect(spec_str: str, seed: int, policy_file: str, n_episodes: int, round_s
         m = world.evaluate(dataset=ds, episodes_idx=ep_c, start_steps=st_c, goal_offset=task.goal_offset,
                            eval_budget=task.eval_budget, callables=task.eval_callables)
         world.close()
-        for i, (e, s) in enumerate(zip(ep_c, st_c)):
+        for i, (e, s) in enumerate(zip(ep_c, st_c, strict=True)):
             r = rec.envs[i]
             grow = offsets[e] + s + task.goal_offset
             if not np.allclose(r["goal_obj"].numpy(), pos[grow], atol=1e-4):
@@ -160,7 +160,7 @@ def collect(spec_str: str, seed: int, policy_file: str, n_episodes: int, round_s
         S = e["oracle_in"]
         e["chunk_raw"] = np.stack([sim.chunk(S["qpos"][t], S["qvel"][t], S["control"][t], e["goal_pos"], e["goal_yaw"],
                                              H * cfg.frameskip) for t in range(len(S["qpos"]))]).astype(np.float32)
-    return {"episodes": episodes, "pairs": list(zip(eps, starts)), "success_rate": float(np.mean(succ)),
+    return {"episodes": episodes, "pairs": list(zip(eps, starts, strict=True)), "success_rate": float(np.mean(succ)),
             "blocks": int(sum(e["z"].shape[0] for e in episodes)), "minutes": round((time.time() - t0) / 60, 1),
             "policy_file": policy_file}
 

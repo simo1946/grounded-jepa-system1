@@ -146,7 +146,7 @@ class HybridBackbone(nn.Module):
             table, new_last = last.unsqueeze(1), last
         idx = (ends.unsqueeze(0) < torch.arange(L, device=h_low.device).unsqueeze(1)).sum(1)
         bstates = [s if s is not None else blk.init_state(B, h_low.device)
-                   for s, blk in zip(bstates, self.high_blocks)]
+                   for s, blk in zip(bstates, self.high_blocks, strict=True)]
         return table[:, idx], {"blocks": bstates, "last": new_last}
 
     def forward(self, h: torch.Tensor, cond: torch.Tensor, t: torch.Tensor,
