@@ -49,6 +49,9 @@ SCHEMA = "https://github.com/ASSERT-KTH/assert-research-agent/blob/main/schemas/
 
 
 # ---------------------------------------------------------------------------------------------- values
+# Lossless images in the PDF: the default JPEG compression blurs the figures' text and lines.
+PDF_FILTER = 'pdf:writer_pdf_Export:{"UseLosslessCompression":{"type":"boolean","value":"true"}}'
+
 def load_values() -> dict:
     vals = {}
     for f in sorted(RESULTS.glob("*.json")):
@@ -314,7 +317,7 @@ def main(draft: bool = False, source: str = "paper.md", name: str = "paper") -> 
     (build / f"{name}.spec.json").write_text(json.dumps(spec, indent=1, ensure_ascii=False))
     docx = PAPER / f"{name}.docx"
     subprocess.run(["node", str(PAPER / "docx_builder.js"), str(build / f"{name}.spec.json"), str(docx)], check=True)
-    subprocess.run(["soffice", "--headless", "--convert-to", "pdf", "--outdir", str(PAPER), str(docx)], check=True,
+    subprocess.run(["soffice", "--headless", "--convert-to", PDF_FILTER, "--outdir", str(PAPER), str(docx)], check=True,
                    capture_output=True)
     # a draft never overwrites the audited configuration; its entries go to paper/build/ for a trial audit
     if name == "paper":

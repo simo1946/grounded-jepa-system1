@@ -1238,14 +1238,6 @@ value = "0.013"
 expr = "cpu_rerun.selection.widest.C2.p_mcnemar"
 
 [[numbers.derive]]
-value = "2"
-expr = "cpu_rerun.selection.significant"
-
-[[numbers.derive]]
-value = "2"
-expr = "cpu_rerun.selection.losses"
-
-[[numbers.derive]]
 value = "3"
 expr = "cpu_rerun.selection.max_loss"
 

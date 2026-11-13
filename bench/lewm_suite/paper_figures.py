@@ -38,8 +38,13 @@ plt.rcParams.update({
 
 
 def _save(fig, out: Path) -> None:
-    fig.savefig(out, dpi=DPI, metadata={"Software": None}, bbox_inches="tight", pad_inches=0.02)
+    """Opaque RGB PNG: Word and LibreOffice tint transparent PNGs grey when they make the PDF."""
+    from PIL import Image
+    fig.savefig(out, dpi=DPI, metadata={"Software": None}, bbox_inches="tight", pad_inches=0.02, facecolor="white")
     plt.close(fig)
+    with Image.open(out) as im:
+        rgb = im.convert("RGB")
+    rgb.save(out, dpi=(DPI, DPI))
 
 
 def _axes(ax, ylabel: str | None, ymax: float = 100, room: float = 0) -> None:
