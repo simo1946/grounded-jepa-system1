@@ -69,14 +69,14 @@ def main(spec_str: str, seed: int, data: str, verify: bool = True, device: str =
     n = int(offsets[-1] + lengths[-1])
     if len(ds) != n:
         raise RuntimeError(f"expected one clip per row ({n}), got {len(ds)}")
-    t0, zs = time.time(), []
+    t0, zs = time.perf_counter(), []
     # clips (num_steps=1) are indexed in row order, so a non-shuffled loader yields rows 0..n-1
     loader = torch.utils.data.DataLoader(ds, batch_size=256, shuffle=False, num_workers=workers)
     for b, item in enumerate(loader):
         px = item["pixels"].to(device)                                    # [b, 1, C, H, W]
         zs.append(lewm.encode({"pixels": px})["emb"][:, 0].float().cpu())
         if b % 40 == 0:
-            print(json.dumps({"rows": b * 256, "of": n, "min": round((time.time() - t0) / 60, 1)}), flush=True)
+            print(json.dumps({"rows": b * 256, "of": n, "min": round((time.perf_counter() - t0) / 60, 1)}), flush=True)
     z = torch.cat(zs)
 
     def col(name):
@@ -125,7 +125,7 @@ def main(spec_str: str, seed: int, data: str, verify: bool = True, device: str =
     tmp = path.with_name(path.name + ".tmp")   # atomic: a cut-off run never leaves a partial cache
     torch.save(out, tmp)
     tmp.replace(path)
-    print(json.dumps({"saved": str(path), "rows": n, "minutes": round((time.time() - t0) / 60, 1)}), flush=True)
+    print(json.dumps({"saved": str(path), "rows": n, "minutes": round((time.perf_counter() - t0) / 60, 1)}), flush=True)
 
 
 if __name__ == "__main__":

@@ -308,7 +308,7 @@ def main(task_name: str, spec_str: str, seed: int, num_eval: int, eval_seed: int
     triv = trivial_mask(task, eval_ds, episodes, starts, goal_offset)
     # Episodes are independent, so evaluating the same pairs in sequential env
     # batches changes only peak memory (Cube: ~0.45 GB per MuJoCo env).
-    t0 = time.time()
+    t0 = time.perf_counter()
     successes, decision_s = [], []
     for lo in range(0, num_eval, chunk):
         ep_c, st_c = episodes[lo:lo + chunk], starts[lo:lo + chunk]
@@ -348,7 +348,7 @@ def main(task_name: str, spec_str: str, seed: int, num_eval: int, eval_seed: int
               "decision_seconds": ({"median": float(np.median(decision_s)), "p10": float(np.percentile(decision_s, 10)),
                                     "p90": float(np.percentile(decision_s, 90)), "calls": len(decision_s),
                                     "envs_per_call": chunk, "device": device} if decision_s else None),
-              "eval_minutes": round((time.time() - t0) / 60, 1)}
+              "eval_minutes": round((time.perf_counter() - t0) / 60, 1)}
     out_path.parent.mkdir(parents=True, exist_ok=True)
     tmp = out_path.with_name(out_path.name + ".tmp")   # atomic: --skip-existing never sees a partial result
     tmp.write_text(json.dumps(result, indent=2))

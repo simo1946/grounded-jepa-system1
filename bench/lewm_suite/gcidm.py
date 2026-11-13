@@ -92,7 +92,7 @@ def train(spec_str: str, seed: int, horizon: bool, epochs: int = 50, batch: int 
     steps = epochs * steps_per_epoch
     opt = torch.optim.AdamW(net.parameters(), lr=lr, weight_decay=1e-4)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, steps, eta_min=lr / 100)
-    log, t0, step = [], time.time(), 0
+    log, t0, step = [], time.perf_counter(), 0
     net.train()
     for ep in range(epochs):
         perm = rows[torch.randperm(len(rows), generator=g)]
@@ -108,7 +108,7 @@ def train(spec_str: str, seed: int, horizon: bool, epochs: int = 50, batch: int 
             opt.step()
             sched.step()
             step += 1
-        log.append({"epoch": ep + 1, "mse": round(loss.item(), 4), "min": round((time.time() - t0) / 60, 2)})
+        log.append({"epoch": ep + 1, "mse": round(loss.item(), 4), "min": round((time.perf_counter() - t0) / 60, 2)})
         if (ep + 1) % 10 == 0:
             print(json.dumps(log[-1]), flush=True)
     out = "gcidm.pt" if horizon else "gcidm_noh.pt"
@@ -120,7 +120,7 @@ def train(spec_str: str, seed: int, horizon: bool, epochs: int = 50, batch: int 
     torch.save(meta, tmp)
     tmp.replace(ckpt / out)
     print(json.dumps({"saved": str(ckpt / out), "params": meta["params"], "steps": steps,
-                      "minutes": round((time.time() - t0) / 60, 2)}), flush=True)
+                      "minutes": round((time.perf_counter() - t0) / 60, 2)}), flush=True)
     return meta
 
 
