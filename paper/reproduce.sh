@@ -5,7 +5,8 @@
 #   GCIDM_REPO=/path/to/gcidm_repo STABLEWM_HOME=/path/to/swm_home paper/reproduce.sh
 #
 # 1. Each results file in results/paper/ is written by `osaudit run`, which records the command, the sha256 of
-#    every input and the git commit of the code (the code must be committed first; results may be regenerated).
+#    every input and the git commit of the code. The instruments declared in the committed osaudit.toml must be
+#    unchanged since the last commit; results files may be regenerated in the same session.
 # 2. Figures 2 and 3 are drawn from results/paper/gpu_cube.json.
 # 3. paper/build.py writes paper/paper.docx, paper/paper.pdf and osaudit.toml (one entry per printed number).
 # 4. osaudit checks every printed number against the results files and every results file against the code.
