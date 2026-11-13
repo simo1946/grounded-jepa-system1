@@ -2,7 +2,7 @@
 # Regenerate everything the paper prints, from the committed result files, and audit it.
 #
 #   pip install osaudit==0.7.0         # Python >= 3.13
-#   GCIDM_REPO=/path/to/gcidm_repo STABLEWM_HOME=/path/to/swm_home paper/reproduce.sh
+#   paper/reproduce.sh
 #
 # 1. Each results file in results/paper/ is written by `osaudit run`, which records the command, the sha256 of
 #    every input and the git commit of the code. The instruments declared in the committed osaudit.toml must be
@@ -11,9 +11,14 @@
 # 3. paper/build.py writes paper/paper.docx, paper/paper.pdf and osaudit.toml (one entry per printed number).
 # 4. osaudit checks every printed number against the results files and every results file against the code.
 #
-# GCIDM_REPO (the GC-IDM authors' code at commit 48c45b1) is needed only for model_sizes.json; STABLEWM_HOME (the
-# regenerated Cube data) only for trivial_share_cpu.json. Steps whose inputs are missing are skipped and keep the
-# committed file.
+# Inputs from outside this repository go in external/ (git-ignored), so the provenance records repository-relative
+# paths:
+#   external/gcidm_repo      the GC-IDM authors' code at commit 48c45b1 (model_sizes.json):
+#     git clone https://github.com/hdnndh/Latent-Geometry-Beyond-Search-Amortizing-Planning-in-World-Models external/gcidm_repo
+#     git -C external/gcidm_repo checkout 48c45b1cb2b34dd2c1c61d222c8309de567fde55
+#   external/cube_data       cube.h5 and cube_eval.h5, the regenerated Cube data (trivial_share_cpu.json); copy or
+#                            hard-link them from $STABLEWM_HOME/datasets
+# Steps whose inputs are missing are skipped and keep the committed file.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 OSA=${OSAUDIT:-osaudit}
@@ -30,14 +35,15 @@ mkdir -p "$R"
 if [ -d results/cpu_rerun ]; then
   "$OSA" run --input results/cpu_rerun -o "$R/cpu_rerun.json" -- python3 "$S/analyze_rerun.py" --runs results/cpu_rerun
 fi
-if [ -n "${GCIDM_REPO:-}" ] && [ -d "$GCIDM_REPO" ]; then
-  "$OSA" run --input "$S/models.py" --input "$GCIDM_REPO/idm/model.py" -o "$R/model_sizes.json" -- \
-    python3 "$S/model_sizes.py"
+GCIDM=external/gcidm_repo
+if [ -f "$GCIDM/idm/model.py" ]; then
+  "$OSA" run --input "$S/models.py" --input "$GCIDM/idm/model.py" -o "$R/model_sizes.json" -- \
+    python3 "$S/model_sizes.py" --gcidm-repo "$GCIDM"
 fi
-if [ -n "${STABLEWM_HOME:-}" ] && [ -f "$STABLEWM_HOME/datasets/cube.h5" ]; then
-  "$OSA" run --input "$STABLEWM_HOME/datasets/cube.h5" --input "$STABLEWM_HOME/datasets/cube_eval.h5" \
-    -o "$R/trivial_share_cpu.json" -- \
-    python3 "$S/trivial_share.py" "$STABLEWM_HOME/datasets/cube.h5" "$STABLEWM_HOME/datasets/cube_eval.h5"
+CUBE=external/cube_data
+if [ -f "$CUBE/cube.h5" ] && [ -f "$CUBE/cube_eval.h5" ]; then
+  "$OSA" run --input "$CUBE/cube.h5" --input "$CUBE/cube_eval.h5" -o "$R/trivial_share_cpu.json" -- \
+    python3 "$S/trivial_share.py" "$CUBE/cube.h5" "$CUBE/cube_eval.h5"
 fi
 
 python3 "$S/paper_figures.py" "$R/gpu_cube.json" paper/figures

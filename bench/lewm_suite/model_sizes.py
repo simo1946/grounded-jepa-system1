@@ -4,7 +4,7 @@ World models are built with models.build_model for each configuration (training-
 included and also counted separately); policies with their constructors at the sizes the study used.
 Counts are exact integers; the paper prints them in millions.
 
-    python model_sizes.py
+    python model_sizes.py [--gcidm-repo external/gcidm_repo]   # with the GC-IDM authors' code at commit 48c45b1
 """
 from __future__ import annotations
 
@@ -66,10 +66,15 @@ def official_gcidm(repo: str | None) -> dict | None:
 
 
 if __name__ == "__main__":
+    import argparse
+
     from instrument_io import emit, quiet_stdout
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--gcidm-repo", default=None, help="clone of the GC-IDM authors' code (also counts their model)")
+    args = ap.parse_args()
     with quiet_stdout():                                   # stable-pretraining logs to stdout
         out = {"world_models": world_models(), "policies": policies()}
-        off = official_gcidm(os.environ.get("GCIDM_REPO"))
+        off = official_gcidm(args.gcidm_repo)
         if off:
             out["official_gcidm"] = off
     emit(out)

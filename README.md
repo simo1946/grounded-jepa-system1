@@ -120,6 +120,11 @@ paper/reproduce.sh        # regenerate results/paper/*.json, the figures, paper.
 osaudit                   # the audit alone; prints nothing when every number is traced
 ```
 
+Two results files also read inputs from outside the repository; `reproduce.sh` looks for them in the git-ignored
+folder `external/` and skips (keeping the committed file) when they are absent: `external/gcidm_repo`, the GC-IDM
+authors' code at commit 48c45b1 (for `model_sizes.json`), and `external/cube_data/cube.h5` and `cube_eval.h5`, the
+regenerated Cube data (for `trivial_share_cpu.json`).
+
 ## Checks added after the review
 
 - `check_goal_collisions.py`: confirms that no two evaluation pairs share a goal image (the camera-dropout

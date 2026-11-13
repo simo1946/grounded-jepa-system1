@@ -9,3 +9,4 @@ bench/lewm_suite/logs/
 .ruff_cache/
 paper/build/
 node_modules/
+external/
