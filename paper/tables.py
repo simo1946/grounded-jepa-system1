@@ -30,18 +30,23 @@ def scale():
     header = ["", "GPU study (main)", "CPU study (follow-ups)", "LeWM / H-JEPA papers"]
     ext = '{{ext: %s | [1] | %s}}'
     rows = [
-        ["Training / held-out episodes", f"{S % ('600', 'GPU-study training episodes')} / {S % ('100', 'GPU-study held-out episodes')}",
+        ["Training / held-out episodes",
+         f"{S % ('600', 'GPU-study training episodes')} / {S % ('100', 'GPU-study held-out episodes')}",
          f"{S % ('400', 'CPU-study training episodes')} / {S % ('80', 'CPU-study held-out episodes')}",
          f"about {ext % ('10,000', 'approximate number of training episodes in the published setups')}"],
         ["Frames", f"{S % ('64', 'frame size in pixels')} px", f"{S % ('64', 'frame size in pixels')} px",
          f"{ext % ('224', 'frame size in pixels of the published setups')} px"],
-        ["World-model training", f"{S % ('4,000', 'GPU-study world-model steps')} steps, batch {S % ('64', 'GPU-study batch size')}",
-         f"{S % ('2,000', 'CPU-study world-model steps')} steps, batch {S % ('32', 'CPU-study batch size')}", "several epochs on GPU"],
+        ["World-model training",
+         f"{S % ('4,000', 'GPU-study world-model steps')} steps, batch {S % ('64', 'GPU-study batch size')}",
+         f"{S % ('2,000', 'CPU-study world-model steps')} steps, batch {S % ('32', 'CPU-study batch size')}",
+         "several epochs on GPU"],
         ["System 1 / subgoal training", f"{S % ('3,000', 'policy training steps')} steps each",
-         f"{S % ('2,000', 'shortest CPU-study policy training')}–{S % ('6,000', 'longest CPU-study policy training')} steps", "–"],
+         f"{S % ('3,000', 'policy training steps')}–{S % ('6,000', 'longest CPU-study policy training')} steps", "–"],
         ["Evaluation pairs", f"{S % ('60', 'evaluation pairs per seed, GPU study')} non-trivial per seed",
-         f"{S % ('50', 'evaluation pairs, CPU study')} non-trivial", f"{ext % ('50', 'evaluation pairs of the published protocol')} standard"],
-        ["Seeds", f"{S % ('3', 'training seeds of the main configurations')} (C6, C7: {S % ('1', 'training seeds of C6 and C7')})",
+         f"{S % ('50', 'evaluation pairs, CPU study')} non-trivial",
+         f"{ext % ('50', 'evaluation pairs of the published protocol')} standard"],
+        ["Seeds",
+         f"{S % ('3', 'training seeds of the main configurations')} (C6, C7: {S % ('1', 'training seeds of C6 and C7')})",
          f"{S % ('1', 'fewest CPU-study training seeds')}–{S % ('2', 'most CPU-study training seeds')}", "–"],
     ]
     return caption, header, rows, _w(.25, .25, .25, .25)
@@ -62,6 +67,7 @@ def hypotheses():
     h5, h5p = f"{c}.all_configs_two_level_vs_flat_50_hier_50", f"{c}.all_configs_two_level_vs_flat_grasp_hier_pk"
     h6, h6p = f"{c}.all_best_parts_vs_lewm_s1_nt", f"{c}.all_best_parts_vs_lewm_s1_pk"
     cam = f"{c}.camera_0_5_prediction_hybrid_vs_transformer_object_cam0_5"
+    h5c3, h5c5 = f"{c}.c3_two_level_vs_flat_50_hier_50", f"{c}.c5_two_level_vs_flat_50_hier_50"
     rows = [
         ["H1", "Object grounding improves System 1",
          f"{{{{pct0: {og}.a_pct}}}} vs {{{{pct0: {og}.b_pct}}}}: {_ci(og)}, Holm p = {{{{p: {og}.p_holm}}}}; grasp "
@@ -72,7 +78,8 @@ def hypotheses():
          f"{{{{num2: {d}.C5.fine_top1_s0_1}}}} (σ = {S % ('0.1', 'perturbation scale of the ranking test')}), "
          f"{{{{num2: {d}.C7.fine_top1_s0_3}}}} vs {{{{num2: {d}.C5.fine_top1_s0_3}}}} "
          f"(σ = {S % ('0.3', 'perturbation scale of the ranking test')}); transformer: "
-         f"{{{{num2: {d}.C6.fine_top1_s0_1}}}} vs {{{{num2: {d}.C3.fine_top1_s0_1}}}} (σ = {S % ('0.1', 'perturbation scale of the ranking test')})",
+         f"{{{{num2: {d}.C6.fine_top1_s0_1}}}} vs {{{{num2: {d}.C3.fine_top1_s0_1}}}} "
+         f"(σ = {S % ('0.1', 'perturbation scale of the ranking test')})",
          "Mechanism works, hybrid only"],
         ["H3", "With ARL, world-model selection stops hurting",
          f"Change in (best-of-16 − mean): {{{{sgn1: {c}.arl_makes_selection_useful_c3_c6.diff_pts}}}} (C6), "
@@ -83,10 +90,11 @@ def hypotheses():
          f"{{{{pct0: {c}.arl_transformer_s1_nt.a_pct}}}} vs {{{{pct0: {c}.arl_transformer_s1_nt.b_pct}}}} (C6 vs C3); "
          f"{{{{pct0: {c}.arl_hybrid_s1_nt.a_pct}}}} vs {{{{pct0: {c}.arl_hybrid_s1_nt.b_pct}}}} (C7 vs C5)", "Not supported"],
         ["H4", "The hybrid is a better state estimator under camera dropout",
-         f"{{{{pct0: {cam}.a_pct}}}} vs {{{{pct0: {cam}.b_pct}}}}: {_ci(cam)}, Holm p = {{{{p: {cam}.p_holm}}}}", "Not supported"],
+         f"{{{{pct0: {cam}.a_pct}}}} vs {{{{pct0: {cam}.b_pct}}}}: {_ci(cam)}, Holm p = {{{{p: {cam}.p_holm}}}}",
+         "Not supported"],
         ["H5", "Two-level System 1 helps long horizons without hurting short ones",
-         f"C3: {{{{pct0: {c}.c3_two_level_vs_flat_50_hier_50.a_pct}}}} vs {{{{pct0: {c}.c3_two_level_vs_flat_50_hier_50.b_pct}}}}, "
-         f"C5: {{{{pct0: {c}.c5_two_level_vs_flat_50_hier_50.a_pct}}}} vs {{{{pct0: {c}.c5_two_level_vs_flat_50_hier_50.b_pct}}}}, "
+         f"C3: {{{{pct0: {h5c3}.a_pct}}}} vs {{{{pct0: {h5c3}.b_pct}}}}, "
+         f"C5: {{{{pct0: {h5c5}.a_pct}}}} vs {{{{pct0: {h5c5}.b_pct}}}}, "
          f"better in every seed; C1, C2: small, not consistent; pooled over {{{{int: {h5}.units}}}} models "
          f"{{{{pct0: {h5}.a_pct}}}} vs {{{{pct0: {h5}.b_pct}}}}: {_ci(h5)}, Holm p = {{{{p: {h5}.p_holm}}}}; grasp "
          f"{{{{pct0: {h5p}.a_pct}}}} vs {{{{pct0: {h5p}.b_pct}}}}", "Supported on object-grounded models"],
@@ -218,7 +226,8 @@ def feedbackc():
         e = f"{p}.bootstrap_episode"
         star = "*" if con["claimed"] else ""
         rows.append([f"{name} {con['a']} vs {con['b']}",
-                     *[f'{{{{int: {p}.per_model["{m}"].a_only}}}} vs {{{{int: {p}.per_model["{m}"].b_only}}}}' for m in FB_MODELS],
+                     *[f'{{{{int: {p}.per_model["{m}"].a_only}}}} vs {{{{int: {p}.per_model["{m}"].b_only}}}}'
+                       for m in FB_MODELS],
                      f"{{{{sgn1: {e}.diff_pts}}}} [{{{{dec1: {e}.ci_lo}}}}, {{{{dec1: {e}.ci_hi}}}}]",
                      f"{{{{p: {p}.p_boot_holm}}}}{star}"])
     return caption, header, rows, _w(.21, .11, .11, .11, .11, .22, .13)
@@ -258,7 +267,8 @@ def impl():
         ["World-model optimiser", f"AdamW, lr {S % ('0.0003', 'world-model learning rate')}, weight decay "
                                   f"{S % ('0.001', 'world-model weight decay')}, {S % ('5%', 'warm-up share')} warm-up "
                                   f"then cosine to {S % ('1%', 'final learning-rate share')} of lr; "
-                                  f"{S % ('4,000', 'GPU-study world-model steps')} steps, batch {S % ('64', 'GPU-study batch size')}"],
+                                  f"{S % ('4,000', 'GPU-study world-model steps')} steps, "
+                                  f"batch {S % ('64', 'GPU-study batch size')}"],
         ["System 1", f"MLP {S % ('576', 'System 1 input width')}–{S % ('512', 'System 1 hidden width')}–"
                      f"{S % ('512', 'System 1 hidden width')}–{S % ('250', 'System 1 output width')}, LayerNorm, GELU, "
                      f"{mp('policies.system1')} parameters; AdamW lr {S % ('0.001', 'policy learning rate')}, weight decay "
@@ -269,14 +279,15 @@ def impl():
                 f"{S % ('30', 'CEM elites')}, horizon {S % ('5', 'CEM horizon in blocks')} blocks"],
         ["Random policy", "uniformly random actions (stable-worldmodel RandomPolicy)"],
         ["Success", f"OGBench Cube task success: cube within {S % ('4', 'success distance in cm')} cm of the goal position"],
-        ["Evaluation", f"evaluation seed {S % ('42', 'evaluation seed')}; the same {S % ('60', 'evaluation pairs per seed, GPU study')} "
-                       "pairs for every model and seed"],
+        ["Evaluation", f"evaluation seed {S % ('42', 'evaluation seed')}; the same "
+                       f"{S % ('60', 'evaluation pairs per seed, GPU study')} pairs for every model and seed"],
         ["Software", f"stable-worldmodel, MuJoCo {S % ('3.15', 'MuJoCo version')}, PyTorch; free Colab T4 GPU"],
         ["CPU-study models (Section 5.8)", f"same architecture; {S % ('400', 'CPU-study training episodes')} training episodes; "
                                            f"{S % ('2,000', 'CPU-study world-model steps')} steps, batch "
                                            f"{S % ('32', 'CPU-study batch size')}; {S % ('2', 'CPUs of the CPU study')} CPUs"],
         ["Short-chunk System 1 (Section 5.8)",
-         f"as System 1 with a 1-block output of {S % ('5', 'short chunk length in steps')} or {S % ('1', 'short chunk length in steps')} "
+         f"as System 1 with a 1-block output of {S % ('5', 'short chunk length in steps')} or "
+         f"{S % ('1', 'short chunk length in steps')} "
          f"steps ({S % ('25', 'action numbers of a 5-step chunk')} or {S % ('5', 'action numbers per step')} numbers); target: "
          f"the next {S % ('5', 'short chunk length in steps')} or {S % ('1', 'short chunk length in steps')} actions; goals "
          f"{S % ('5', 'nearest training goal in steps')}–{S % ('25', 'farthest training goal in steps')} steps ahead; "
@@ -295,7 +306,8 @@ def impl():
         ["Our GC-IDM-style controller (Section 5.8)",
          "implemented independently from the description in [22]: MLP on [z_now, z_goal], "
          f"{S % ('3', 'GC-IDM hidden layers')} layers of width {S % ('512', 'GC-IDM width')}, LayerNorm, GELU, dropout "
-         f"{S % ('0.1', 'GC-IDM dropout')}; remaining steps / {S % ('50', 'step budget')} → {S % ('64', 'sinusoidal features')} "
+         f"{S % ('0.1', 'GC-IDM dropout')}; remaining steps / {S % ('50', 'step budget')} → "
+         f"{S % ('64', 'sinusoidal features')} "
          f"sinusoidal features → 2-layer MLP → AdaLN-Zero on the backbone output; one action out; MSE on (z_t, z_t+h, a_t), "
          f"h uniform in {S % ('1', 'nearest GC-IDM goal in steps')}–{S % ('50', 'farthest GC-IDM goal in steps')} steps; AdamW "
          f"lr {S % ('0.001', 'policy learning rate')}, weight decay {S % ('0.0001', 'policy weight decay')}, cosine to "

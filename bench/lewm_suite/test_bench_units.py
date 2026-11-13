@@ -591,3 +591,13 @@ def test_trivial_share_counts_and_lewm_draw(tmp_path):
     g = np.random.default_rng(42)                                       # the calls in le-wm eval.py
     assert drawn.tolist() == np.sort(valid[g.choice(len(valid) - 1, size=3, replace=False)]).tolist()
     assert s["lewm_eval_draw"]["rows"] == drawn.tolist()
+
+
+def test_time_decisions_skips_policies_without_solver():
+    from evaluate import _time_decisions
+
+    class NoSolver:                                       # like stable-worldmodel's RandomPolicy
+        pass
+    out: list = []
+    _time_decisions(NoSolver(), out)
+    assert out == []

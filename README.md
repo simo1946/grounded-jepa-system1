@@ -19,6 +19,8 @@ world model does not help.
 | `bench/lewm_suite/cluster_bootstrap.py` | Paired success differences with a bootstrap over evaluation episodes (or pairs) |
 | `docs/feedback_study.md` | Its results |
 | `results/` | Per-episode outcomes and evaluation pair identities of every reported run, with the summaries |
+| `paper/` | The paper's source (`paper.md`, `tables.py`), its builder (`build.py`, `docx_builder.js`), `reproduce.sh`, and the built `paper.docx` / `paper.pdf`; `osaudit.toml` (repository root) traces every printed number |
+| `notebooks/official_cube_check.ipynb` | Colab check of the LeWM authors' released Cube dataset: pairs already solved at the start, and a random policy with their `eval.py` |
 | `tests/`, `bench/lewm_suite/test_bench_units.py` | Unit tests (`pytest` runs both) |
 
 ## Install
@@ -57,20 +59,38 @@ Pipeline per configuration: `collect.py` → `merge_h5.py` → `train.py` (world
 Configurations (`colab_plan.py: CONFIGS`): C1 `lewm`; C2 `lewm+idm+sa`; C3 `lewm+idm+sa+obj`;
 C5 `hybrid+idm+sa+obj`; C6/C7 add `+arl`. Model specs are parsed by `models.py: Spec`.
 
-## CPU follow-up studies (Section 5.6 and Appendix B)
+## CPU follow-up studies (Sections 5.1, 5.2 and 5.6)
 
-These ran on a 2-CPU machine at the CPU-study scale (400/80 episodes, 2,000 world-model steps). Each script
-skips finished work.
+These run on a 2-CPU machine at the CPU-study scale (400/80 episodes, 2,000 world-model steps). Their first result
+files were lost when the compute workspace was replaced (November 2026), so they were run again on regenerated data
+with `run_rerun.sh`, which follows the original scripts below with two recorded changes: the 400 training episodes
+were collected in two parts (seeds 3072 and 3073) and merged, and System 1 is trained with the GPU-study recipe
+(`cached_policy.py`, 3,000 steps, batch 256) instead of `train_policy.py`. Regenerating the data with the same
+seeds did not reproduce the original episodes, so every number is new. `analyze_rerun.py` computes the numbers the
+paper prints from the result files in `results/cpu_rerun/`.
 
-| Paper section | Script | Main programs | Plan file |
+```bash
+cd bench/lewm_suite
+export STABLEWM_HOME=/path/to/swm_home MUJOCO_GL=egl
+python collect.py --task cube --name cube_eval --episodes 80 --seed 777
+python collect.py --task cube --name cube_p0 --episodes 200 --seed 3072
+python collect.py --task cube --name cube_p1 --episodes 200 --seed 3073
+python merge_h5.py --out cube --parts cube_p0 cube_p1
+./run_rerun.sh base && ./run_rerun.sh timing && ./run_rerun.sh select && ./run_rerun.sh ceiling && ./run_rerun.sh verifier
+```
+
+| Paper section | Stage of `run_rerun.sh` | Original script | Plan file |
 |---|---|---|---|
-| 5.2 CPU replication of object grounding | `run_next9.sh` | `train.py`, `cached_policy.py`, `evaluate.py`, `analyze.py` | – |
-| 5.6 selection vs random candidate | `run_verify.sh` | `evaluate.py`, `analyze_verify.py` | `prereg_verification.md` |
-| 5.6 privileged judge and outcome critic (E6) | `run_critic_data.sh`, `run_critic_eval.sh` | `gen_critic_data.py`, `critic.py`, `oracle.py` | `prereg_critic.md` |
-| 5.6 contrastive verifier (E10) | `run_verifier.sh` | `contrastive_verifier.py` | `prereg_critic.md` |
-| B.1 practice in the simulator | `run_residual.sh`, `run_practice.sh`, `run_awr.sh` | `residual_rl.py`, `practice_rl.py`, `awr_policy.py` | `prereg_critic.md` |
-| B.2 flow head, clean labels, DAgger | `run_overnight.sh`, `run_dagger.sh`, `run_dagger2.sh`, `run_flow_budget.sh` | `cached_policy.py`, `oracle_policy.py`, `dagger.py` | `prereg_overnight.md` |
-| B.3 action-resolution loss | `run_extra4.sh` | `train.py`, `evaluate.py` | – |
+| Introduction: random policy on the standard protocol | `base` | – | – |
+| 5.1 single-robot decision latency | `timing` | – | – |
+| 5.2 CPU replication of object grounding | `base` | `run_next9.sh` | – |
+| 5.6 selection vs a random candidate | `select` | `run_verify.sh` | `prereg_verification.md` |
+| 5.6 privileged judge and outcome critic (E6) | `ceiling` | `run_critic_data.sh`, `run_critic_eval.sh` | `prereg_critic.md` |
+| 5.6 contrastive verifier (E10) | `verifier` | `run_verifier.sh` | `prereg_critic.md` |
+
+Not in the current paper: practice in the simulator (`run_residual.sh`, `run_practice.sh`, `run_awr.sh`) and clean
+labels and DAgger (`run_dagger.sh`, `run_dagger2.sh`). Their result files were lost and they were not run again;
+the code is kept.
 
 ## Feedback-frequency study (Section 5.8)
 
@@ -87,6 +107,18 @@ python analyze_feedback.py                       # tables, episode-clustered boo
 ```
 
 Plan and dated addendum: `prereg_feedback.md`.
+
+## Paper and audit
+
+Every number in the paper comes from a results file in `results/paper/`, written by `osaudit run` (command, input
+checksums and git commit recorded). `paper/build.py` prints the numbers from those files and writes `osaudit.toml`;
+[osaudit](https://github.com/ASSERT-KTH/osaudit) (`pip install osaudit==0.7.0`, Python 3.13+) then checks the PDF
+against the files and the files against the code:
+
+```bash
+paper/reproduce.sh        # regenerate results/paper/*.json, the figures, paper.docx and paper.pdf, then run osaudit
+osaudit                   # the audit alone; prints nothing when every number is traced
+```
 
 ## Checks added after the review
 

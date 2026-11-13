@@ -95,7 +95,7 @@ def main(runs: Path | None = None, json_only: bool = False) -> dict:
                            "bootstrap_episode": by_ep, "bootstrap_pair": by_pair,
                            "same_sign_all_models": len(signs) == 1 and 0 not in signs}
         p_boot.append(by_ep["p_boot"])
-    for (name, _, _), ph in zip(CONTRASTS, holm(p_boot)):
+    for (name, _, _), ph in zip(CONTRASTS, holm(p_boot), strict=True):
         c = contrasts[name]
         c["p_boot_holm"] = ph
         c["claimed"] = bool(c["same_sign_all_models"] and ph < 0.05)

@@ -43,9 +43,10 @@ def pick_pairs(lengths, goal_offset: int, n: int, seed: int, exclude=None):
 def _time_decisions(policy, out: list) -> None:
     """Record the wall-clock time of every decision: one call of the solver's solve() (encoding the frames,
     choosing the actions, copying them to the CPU), with CUDA synchronised. The policy calls the solver only
-    when it replans; the steps in between replay the stored plan and are not counted."""
-    solver = policy.solver
-    if getattr(solver, "_timed", False):
+    when it replans; the steps in between replay the stored plan and are not counted. Policies without a solver
+    (the random policy) are not timed."""
+    solver = getattr(policy, "solver", None)
+    if solver is None or getattr(solver, "_timed", False):
         return
     orig = solver.solve
 

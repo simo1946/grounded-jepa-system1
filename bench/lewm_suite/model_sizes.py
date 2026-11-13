@@ -14,8 +14,8 @@ import torch
 
 os.environ.setdefault("HWM_IMG_SIZE", "64")
 
-from colab_plan import CONFIGS  # noqa: E402
 from models import Spec, TrainConfig, build_model, state_columns  # noqa: E402
+from study_configs import CONFIGS  # noqa: E402
 from tasks import get_task  # noqa: E402
 
 STATE_DIMS = {"proprio_effector_pos": 3, "proprio_effector_yaw": 1, "proprio_gripper_opening": 1,

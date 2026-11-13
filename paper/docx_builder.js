@@ -81,6 +81,7 @@ function build(spec, root) {
     children: [new TextRun({ text: m.author, font: FONT, size: 22 })] }));
   out.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 240 },
     children: [new TextRun({ text: m.affil, italics: true, font: FONT, size: 19 })] }));
+  let prev = null, listInstance = 0;
   for (const b of spec.blocks) {
     switch (b.type) {
       case "abstract":
@@ -105,6 +106,16 @@ function build(spec, root) {
         out.push(new Paragraph({ numbering: { reference: "bullets", level: 0 }, alignment: AlignmentType.JUSTIFIED,
           spacing: { after: 60, line: 264 }, children: runs(b.runs) }));
         break;
+      case "number":
+        if (prev !== "number") listInstance += 1;          // each numbered list starts again at 1
+        out.push(new Paragraph({ numbering: { reference: "steps", level: 0, instance: listInstance }, alignment: AlignmentType.JUSTIFIED,
+          spacing: { after: 60, line: 264 }, children: runs(b.runs) }));
+        break;
+      case "code":
+        out.push(new Paragraph({ spacing: { before: 40, after: 40, line: 240 }, indent: { left: 400 },
+          shading: { type: ShadingType.CLEAR, color: "auto", fill: "F2F4F7" },
+          children: [new TextRun({ text: b.text, font: "Courier New", size: 17 })] }));
+        break;
       case "ref":
         out.push(new Paragraph({ spacing: { after: 60 }, indent: { left: 400, hanging: 400 },
           children: runs(b.runs, { size: 19 }) }));
@@ -113,6 +124,7 @@ function build(spec, root) {
       case "figure": out.push(...figure(b, root)); break;
       default: throw new Error(`unknown block type ${b.type}`);
     }
+    prev = b.type;
   }
   return new Document({
     creator: m.author, title: m.title,
@@ -127,8 +139,12 @@ function build(spec, root) {
           run: { font: FONT, size: 22, bold: true }, paragraph: { spacing: { before: 200, after: 80 }, keepNext: true, outlineLevel: 1 } },
       ],
     },
-    numbering: { config: [{ reference: "bullets", levels: [{ level: 0, format: LevelFormat.BULLET, text: "•",
-      alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 500, hanging: 260 } } } }] }] },
+    numbering: { config: [
+      { reference: "bullets", levels: [{ level: 0, format: LevelFormat.BULLET, text: "\u2022",
+        alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 500, hanging: 260 } } } }] },
+      { reference: "steps", levels: [{ level: 0, format: LevelFormat.DECIMAL, text: "%1.",
+        alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 500, hanging: 300 } } } }] },
+    ] },
     sections: [{
       properties: { page: { size: { width: PAGE_W, height: PAGE_H }, margin: { top: MARGIN, bottom: MARGIN, left: MARGIN, right: MARGIN } } },
       footers: { default: new Footer({ children: [new Paragraph({ alignment: AlignmentType.CENTER,

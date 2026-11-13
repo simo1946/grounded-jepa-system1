@@ -5,7 +5,6 @@ import json
 import multiprocessing as mp
 
 import h5py
-import numpy as np
 import torch
 
 from cached_policy import H, OfflineWindows

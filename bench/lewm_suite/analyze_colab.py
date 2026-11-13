@@ -401,7 +401,7 @@ def fig_memory(rows: list[dict], path: Path) -> None:
 
 def main(profile: str, home: Path, task: str = "cube") -> dict:
     os.environ["STABLEWM_HOME"] = str(home)
-    from colab_plan import CONFIGS, PROFILES
+    from study_configs import CONFIGS, PROFILES
     res = load(home, PROFILES[profile]["num_eval"], CONFIGS, task)
     cfgs = [c for c in CONFIGS if any(k[0] == c for k in res)]
     rows, t_md = table(res, cfgs)

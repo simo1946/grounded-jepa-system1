@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # Re-run of the CPU-study experiments whose result files were lost (2026-11-12), on data regenerated with the
-# same collector and seeds (collect.py: cube 400 episodes seed 3072, cube_eval 80 episodes seed 777).
-# The regenerated episodes are not bit-identical to the lost ones, so every number is new; the paper reports
-# these. Commands and settings are those of the original scripts named per stage. Every step skips finished
+# same collector: cube_eval 80 episodes (collect.py --seed 777, as before) and cube 400 episodes, collected in two
+# parts of 200 (seeds 3072 and 3073, as colab_plan.py numbers its parts) and merged with merge_h5.py, because one
+# 400-episode collection did not fit the compute session's 2-hour limit. The regenerated episodes are not identical
+# to the lost ones (the 60 feedback-study pairs drawn from cube_eval differ), so every number is new; the paper
+# reports these. Commands and settings are those of the original scripts named per stage. Every step skips finished
 # work, and train.py resumes from its last checkpoint, so the script can be restarted at any point.
 #
 #   ./run_rerun.sh base       # data checks, random baseline, world models and System 1 (5.2 replication)
@@ -18,15 +20,21 @@ H=$STABLEWM_HOME
 mkdir -p logs "$H/results"
 G=lewm+idm+sa          # C2
 O=lewm+idm+sa+obj      # C3
-NT=(--task cube --pairs nontrivial --skip-existing)
+NT=(--task cube --pairs nontrivial --skip-existing --policy-file policy_s1.pt)
 
 log()    { echo "[$(date +%H:%M:%S)] $*"; }
 ck()     { echo "$H/checkpoints/cube/$1/seed$2"; }
 train()  { [ -f "$(ck "$1" "$2")/weights.pt" ] || python3 train.py --task cube --spec "$1" --seed "$2" --steps 2000; }
-policy() { [ -f "$(ck "$1" "$2")/policy.pt" ]  || python3 train_policy.py --task cube --spec "$1" --seed "$2"; }
 cache()  { local d=$3 n
            n=$(python3 -c "from models import Spec; from latent_cache import cache_path; print(cache_path(Spec.parse('$1').name(), $2, '$d'))")
            [ -f "$n" ] || python3 latent_cache.py --spec "$1" --seed "$2" --data "$d"; }
+# System 1 with the GPU-study recipe (cached_policy.py, 3,000 steps, batch 256, as colab_plan.py), on the latent
+# cache. The first CPU runs used train_policy.py (policy.pt), which re-encodes frames and takes about 70 minutes per
+# model on 2 CPUs; the re-run uses the main study's recipe instead, and the paper says so.
+policy() { cache "$1" "$2" cube
+           [ -f "$(ck "$1" "$2")/policy_s1.pt" ] || python3 cached_policy.py --task cube --spec "$1" --seed "$2" \
+             --out policy_s1.pt --steps 3000 --batch 256 --device cpu; }
+
 
 stage_base() {
   log "already-solved pairs in the regenerated data"

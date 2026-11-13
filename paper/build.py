@@ -167,7 +167,8 @@ class Formatter:
             return s
         if kind == "p":
             if v < P_FLOOR:
-                self.ledger.allow[(str(P_FLOOR), "reporting floor for p-values (smaller values are printed as < 0.001)", "")] = None
+                why = "reporting floor for p-values (smaller values are printed as < 0.001)"
+                self.ledger.allow[(str(P_FLOOR), why, "")] = None
                 return f"< {P_FLOOR}"
             s = "1" if v == 1 else _dec(v, 2) if v >= 0.0995 else _dec(v, 3)
             if s in ("1", "1.00") and v != 1:
@@ -180,7 +181,8 @@ class Formatter:
         if k in ("num", "pct") and v < 0:
             raise ValueError(f"{expr} = {v} is negative: use sgn (always signed) or dec (minus sign only)")
         if k == "num" and d == 0 and float(v) != int(v):
-            raise ValueError(f"{{{{num0: {expr}}}}} = {v}: osaudit matches a plain integer only to an integral value; use num1 or pct0")
+            raise ValueError(f"{{{{num0: {expr}}}}} = {v}: osaudit matches a plain integer only to an integral value; "
+                             "use num1 or pct0")
         s = _dec(abs(v) if k in ("sgn", "dec") else v, d)
         if k == "pct":
             self._record(s + "%", expr, v)
@@ -253,6 +255,10 @@ def parse(md: str, f: Formatter, tables) -> dict:
             blocks.append({"type": "h1", "text": "References"})
             in_refs = True
             continue
+        if line.startswith("CODE: "):                     # one line of code, shown verbatim (never a placeholder)
+            flush()
+            blocks.append({"type": "code", "text": line[6:]})
+            continue
         if line.startswith("TABLE: "):
             flush()
             blocks.append(tables.build(line[7:].strip(), f))
@@ -270,6 +276,11 @@ def parse(md: str, f: Formatter, tables) -> dict:
             flush()
             blocks.append({"type": "bullet", "runs": runs(f.text(line[2:]))})
             continue
+        numbered = re.match(r"(\d+)\. (.*)", line)
+        if numbered and not in_refs:
+            flush()
+            blocks.append({"type": "number", "runs": runs(f.text(numbered.group(2)))})
+            continue
         if in_refs:
             flush()
             para.append(line)
@@ -286,24 +297,32 @@ def osaudit_toml(ledger: Ledger) -> str:
             f"paper/paper.md; do not edit by hand.\n\n{base}\n\n{ledger.toml()}")
 
 
-def main(draft: bool = False) -> None:
+def main(draft: bool = False, source: str = "paper.md", name: str = "paper") -> None:
+    """Build paper/<name>.docx and .pdf from paper/<source>; the paper (name "paper") also writes osaudit.toml."""
     sys.path.insert(0, str(PAPER))
     import tables
     ledger = Ledger()
     f = Formatter(load_values(), ledger, draft)
-    spec = parse((PAPER / "paper.md").read_text(), f, tables)
+    spec = parse((PAPER / source).read_text(), f, tables)
     build = PAPER / "build"
     build.mkdir(exist_ok=True)
-    (build / "spec.json").write_text(json.dumps(spec, indent=1, ensure_ascii=False))
-    docx = PAPER / "paper.docx"
-    subprocess.run(["node", str(PAPER / "docx_builder.js"), str(build / "spec.json"), str(docx)], check=True)
+    (build / f"{name}.spec.json").write_text(json.dumps(spec, indent=1, ensure_ascii=False))
+    docx = PAPER / f"{name}.docx"
+    subprocess.run(["node", str(PAPER / "docx_builder.js"), str(build / f"{name}.spec.json"), str(docx)], check=True)
     subprocess.run(["soffice", "--headless", "--convert-to", "pdf", "--outdir", str(PAPER), str(docx)], check=True,
                    capture_output=True)
     # a draft never overwrites the audited configuration; its entries go to paper/build/ for a trial audit
-    (build / "osaudit.toml" if draft else ROOT / "osaudit.toml").write_text(osaudit_toml(ledger))
-    print(json.dumps({"docx": str(docx), "pdf": str(PAPER / "paper.pdf"), "derive": len(ledger.derive),
+    if name == "paper":
+        (build / "osaudit.toml" if draft else ROOT / "osaudit.toml").write_text(osaudit_toml(ledger))
+    print(json.dumps({"docx": str(docx), "pdf": str(PAPER / f"{name}.pdf"), "derive": len(ledger.derive),
                       "allow": len(ledger.allow), "pending": f.pending}, indent=1))
 
 
 if __name__ == "__main__":
-    main(draft="--draft" in sys.argv[1:])
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--draft", action="store_true", help="show missing values as [pending: ...]")
+    ap.add_argument("--source", default="paper.md")
+    ap.add_argument("--name", default="paper", help="output name: paper/<name>.docx and .pdf")
+    a = ap.parse_args()
+    main(a.draft, a.source, a.name)

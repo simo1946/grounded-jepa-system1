@@ -73,7 +73,7 @@ def main(folder: Path) -> dict:
     for spec, tag in ((O, "C3"), (G, "C2")):
         for seed in (0, 1):
             rep[(tag, seed)] = R.one(**nontrivial(spec=spec, seed=seed, controller="s1", k=1, num_eval=50,
-                                                  policy_file="policy.pt"))
+                                                  policy_file="policy_s1.pt"))
     a = {"successes": rep[("C3", 0)]["successes"] + rep[("C3", 1)]["successes"],
          "episodes_idx": rep[("C3", 0)]["episodes_idx"] * 2, "start_steps": rep[("C3", 0)]["start_steps"] * 2, "run": "C3"}
     b = {"successes": rep[("C2", 0)]["successes"] + rep[("C2", 1)]["successes"],
@@ -95,9 +95,9 @@ def main(folder: Path) -> dict:
     for spec, tag in ((G, "C2"), (O, "C3")):
         for s in (0.25, 0.5, 1.0, 2.0):
             wm = R.one(**nontrivial(spec=spec, seed=0, controller="s1", k=K, num_eval=50, std_scale=s, select="cost",
-                                    policy_file="policy.pt"))
+                                    policy_file="policy_s1.pt"))
             rnd = R.one(**nontrivial(spec=spec, seed=0, controller="s1", k=K, num_eval=50, std_scale=s, select="random",
-                                     policy_file="policy.pt"))
+                                     policy_file="policy_s1.pt"))
             comps.append({"model": tag, "std_scale": s, "world_model": solved(wm), "random": solved(rnd),
                           **mcnemar(wm, rnd)})
     margins = [c["world_model"] - c["random"] for c in comps]

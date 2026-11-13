@@ -17,10 +17,9 @@ import re
 from pathlib import Path
 
 import numpy as np
-from analyze_colab import (NAMES, PRIMARY, _paired, contrasts_list, diagnostics, holm, load, mcnemar_exact,
-                           verification_did_rows)
+from analyze_colab import NAMES, PRIMARY, _paired, contrasts_list, diagnostics, holm, load, mcnemar_exact, verification_did_rows
 from cluster_bootstrap import cluster_bootstrap
-from colab_plan import CONFIGS, PROFILES
+from study_configs import CONFIGS, PROFILES
 
 N_BOOT = 10_000
 
@@ -36,7 +35,7 @@ def success(res: dict) -> dict:
         out[c][e]["seeds"][f"s{s}"] = float(100 * v.mean())
         out[c][e]["solved"][f"s{s}"] = int(v.sum())
     for c in out:
-        for e, d in out[c].items():
+        for d in out[c].values():
             x = np.array(list(d["seeds"].values()))
             d["mean"] = float(x.mean())
             d["n_seeds"] = len(x)

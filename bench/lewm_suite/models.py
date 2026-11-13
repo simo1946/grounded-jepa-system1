@@ -17,7 +17,7 @@ script, so data, training and evaluation stay consistent.
 from __future__ import annotations
 
 import os
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 from functools import partial
 from pathlib import Path
 from types import SimpleNamespace

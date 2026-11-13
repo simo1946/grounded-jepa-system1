@@ -39,8 +39,6 @@ def make_clips(task, cfg: TrainConfig, name: str):
 
 
 def main(task_name: str, spec_str: str, seed: int, steps: int, data: str) -> None:
-    import numpy as np
-
     from hybrid_wm.control.latent_policy import ChunkPolicy, hindsight_batch
 
     cfg = TrainConfig()

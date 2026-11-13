@@ -17,7 +17,6 @@ import argparse
 import json
 import time
 
-import numpy as np
 import torch
 
 torch.set_flush_denormal(True)
