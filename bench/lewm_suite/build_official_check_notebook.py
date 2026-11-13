@@ -19,9 +19,13 @@ LEWM_COMMIT = "8edfeb336732b5f3ce7b8b210d0ba370a09e2cac"
 
 INTRO = """# Already-solved pairs in the official LeWM Cube dataset
 
-1. Upload `grounded-jepa-system1.zip` to `MyDrive/hybrid-wm/` (as for the GPU study).
-2. Run all cells. The download is about 46 GB and is streamed: only the extracted `.h5` file is written.
-3. The result is saved to `MyDrive/hybrid-wm/official_cube_check.json`; send that file back.
+1. Upload `grounded-jepa-system1.zip` to `MyDrive/hybrid-wm/` (as for the GPU study), replacing the old one.
+2. Runtime: the T4 GPU runtime, as for the GPU study (its rendering setup is known to work). Run all cells.
+   The download is about 46 GB and is streamed: only the extracted `.h5` file is written.
+3. The result is saved to `MyDrive/hybrid-wm/official_cube_check.json` as soon as the already-solved share is
+   computed, and again after the authors' random-policy evaluation, which runs 50 environments in parallel and
+   needs about 9 GB of RAM. If that step runs out of memory, the file records the error and still holds the share.
+   Send the file back either way.
 """
 
 SETUP = rf'''
@@ -41,7 +45,8 @@ run(pip + ["--no-deps", "ogbench==1.2.1", "dm_control==1.0.48"])
 if not pathlib.Path("/content/le-wm").exists():
     run(["git", "clone", "https://github.com/lucas-maes/le-wm", "/content/le-wm"])
 run(["git", "-C", "/content/le-wm", "checkout", "-q", "{LEWM_COMMIT}"])
-print("free disk GB:", shutil.disk_usage("/content").free // 2**30)
+print("free disk GB:", shutil.disk_usage("/content").free // 2**30,
+      "| RAM GB:", os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") // 2**30)
 '''
 
 CHECK = r'''

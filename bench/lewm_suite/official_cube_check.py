@@ -86,7 +86,7 @@ def random_eval(h5: Path, lewm_repo: Path, home: Path) -> dict:
     cmd = [sys.executable, "eval.py", "--config-name=cube.yaml", "policy=random",
            f"hydra.run.dir={home / 'hydra_outputs'}"]                  # keep the clone unmodified
     p = subprocess.run(cmd, cwd=lewm_repo, env=env, capture_output=True, text=True)
-    if p.returncode != 0:
+    if p.returncode != 0:                                            # -9: killed, usually out of memory
         raise RuntimeError(f"eval.py failed ({p.returncode})\nstdout:\n{p.stdout[-3000:]}\nstderr:\n{p.stderr[-3000:]}")
     rate = re.findall(r"'success_rate': ([0-9.]+)", p.stdout)        # eval.py prints the metrics dict
     succ = re.findall(r"'episode_successes': array\(\[([^\]]*)\]", p.stdout, flags=re.S)
@@ -121,9 +121,13 @@ if __name__ == "__main__":
             h5 = Path(hf_hub_download(REPO_ID, path, repo_type="dataset", local_dir=a.data_dir))
     res["h5_bytes"] = h5.stat().st_size
     res["trivial_share"] = summary(h5)
+    a.out.write_text(json.dumps(res, indent=1))           # saved before the slower, memory-heavy random run
     if a.random_eval:
-        res["random_policy"] = random_eval(h5, a.lewm_repo, a.home)
-    a.out.write_text(json.dumps(res, indent=1))
+        try:                                              # 50 parallel 224-px environments need about 9 GB of RAM
+            res["random_policy"] = random_eval(h5, a.lewm_repo, a.home)
+        except RuntimeError as e:
+            res["random_policy"] = {"error": str(e)[-3000:]}
+        a.out.write_text(json.dumps(res, indent=1))
     print(json.dumps({k: v for k, v in res.items() if k != "trivial_share"} |
                      {"all_pairs": res["trivial_share"]["all_pairs"],
                       "lewm_eval_draw": {k: v for k, v in res["trivial_share"]["lewm_eval_draw"].items()
