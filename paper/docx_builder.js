@@ -4,7 +4,8 @@
 //
 // The specification holds only resolved text (every number already filled in from the results files), so this
 // script does layout only: A4, Times New Roman, centred title block, justified abstract, numbered headings,
-// tables with a shaded header row and the caption above, figures with the caption below.
+// tables in the three-rule style of journals (heavy rule above and below the table, a light rule under the header,
+// no vertical lines) with the caption above, figures with the caption below.
 "use strict";
 const fs = require("fs");
 const path = require("path");
@@ -16,8 +17,9 @@ const {
 const FONT = "Times New Roman";
 const PAGE_W = 11906, PAGE_H = 16838, MARGIN = 1300;          // A4, about 2.3 cm margins (DXA)
 const TEXT_W = PAGE_W - 2 * MARGIN;
-const BORDER = { style: BorderStyle.SINGLE, size: 4, color: "9AA5B1" };
-const CELL_BORDERS = { top: BORDER, bottom: BORDER, left: BORDER, right: BORDER };
+const NONE = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
+const HEAVY = { style: BorderStyle.SINGLE, size: 12, color: "000000" };   // 1.5 pt
+const LIGHT = { style: BorderStyle.SINGLE, size: 4, color: "000000" };    // 0.5 pt
 
 function runs(spec, base = {}) {
   return (spec || []).map((r) => new TextRun({
@@ -26,10 +28,14 @@ function runs(spec, base = {}) {
   }));
 }
 
+// "< 0.001", "55.0 ± 1.0" and "[8.3, 25.6]" each stay on one line
+const keepTogether = (spec) => (spec || []).map((r) => ({ ...r, t: r.t
+  .replace(/< (?=\d)/g, "<\u00a0").replace(/ ± /g, "\u00a0±\u00a0").replace(/\[([^\]]*?), ([^\]]*?)\]/g, "[$1,\u00a0$2]") }));
+
 function cellParagraphs(cell, opts) {
   return [new Paragraph({
     alignment: opts.align, spacing: { before: 30, after: 30 }, keepNext: opts.keepNext, keepLines: true,
-    children: runs(cell, { size: 18, bold: opts.bold }),
+    children: runs(keepTogether(cell), { size: 18, bold: opts.bold }),
   })];
 }
 
@@ -38,22 +44,28 @@ function table(block) {
   const total = widths.reduce((a, b) => a + b, 0);
   if (total !== TEXT_W) throw new Error(`table "${block.name}": widths sum to ${total}, expected ${TEXT_W}`);
   const last = block.rows.length - 1;
+  // first column and prose columns (long cells) left-aligned, short numeric columns centred
+  const textLen = (cell) => (cell || []).map((r) => r.t).join("").length;
+  const prose = widths.map((_, j) => j === 0 ||
+    block.rows.reduce((a, r) => a + textLen(r[j]), 0) / Math.max(1, block.rows.length) > 28);
   const row = (cells, header, i) => new TableRow({
     tableHeader: header, cantSplit: true,
     children: cells.map((c, j) => new TableCell({
-      borders: CELL_BORDERS, width: { size: widths[j], type: WidthType.DXA },
-      verticalAlign: VerticalAlign.CENTER,
-      margins: { top: 40, bottom: 40, left: 80, right: 80 },
-      shading: header ? { type: ShadingType.CLEAR, color: "auto", fill: "E4EAF2" } : undefined,
+      borders: { left: NONE, right: NONE, top: header ? HEAVY : NONE,
+                 bottom: header ? LIGHT : (i === last ? HEAVY : NONE) },
+      width: { size: widths[j], type: WidthType.DXA },
+      verticalAlign: header ? VerticalAlign.BOTTOM : VerticalAlign.TOP,
+      margins: { top: header ? 60 : 25, bottom: header ? 60 : 25, left: 90, right: 90 },
       // keep a table on one page: every row but the last keeps with the next
       children: cellParagraphs(c, { bold: header, keepNext: header || i < last,
-        align: j === 0 ? AlignmentType.LEFT : AlignmentType.CENTER }),
+        align: prose[j] ? AlignmentType.LEFT : AlignmentType.CENTER }),
     })),
   });
   return [
     new Paragraph({ keepNext: true, spacing: { before: 160, after: 80 }, children: runs(block.caption, { italics: true, size: 19 }) }),
     new Table({
       width: { size: TEXT_W, type: WidthType.DXA }, columnWidths: widths,
+      borders: { top: NONE, bottom: NONE, left: NONE, right: NONE, insideHorizontal: NONE, insideVertical: NONE },
       rows: [row(block.header, true, -1), ...block.rows.map((r, i) => row(r, false, i))],
     }),
     new Paragraph({ spacing: { after: 120 }, children: [] }),

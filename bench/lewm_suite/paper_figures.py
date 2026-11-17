@@ -3,7 +3,8 @@
     python paper_figures.py ../../results/paper/gpu_cube.json ../../paper/figures
 
 Figure 1 (the system) is a diagram; its two camera frames are those of Figure 2. Figure 2 (the task) shows camera
-frames from paper/figures/data (figure_examples.py, figure_rollout.py). Figures 3 to 5 are drawn from gpu_cube.json
+frames from paper/figures/data: simulator states saved by figure_examples.py and figure_rollout.py, rendered at
+384 pixels by figure_render.py (the model sees 64-pixel frames). Figures 3 to 5 are drawn from gpu_cube.json
 (paper_values_gpu.py): bars are the mean over seeds, dots the individual seeds, error bars the 95% pair-bootstrap
 interval.
 
@@ -148,7 +149,7 @@ def fig_latent(diag: dict, out: Path, success_cm: float = 4.0) -> None:
 
 
 def _frame(ax, img, title: str | None = None, edge: str = MUTED) -> None:
-    ax.imshow(img, interpolation="bicubic")
+    ax.imshow(img, interpolation="antialiased")
     ax.set_xticks([])
     ax.set_yticks([])
     for s in ax.spines.values():
@@ -159,16 +160,18 @@ def _frame(ax, img, title: str | None = None, edge: str = MUTED) -> None:
 
 
 def fig_task(data: Path, out: Path, n_roll: int = 6) -> None:
-    """(a) an already-solved pair, (b) a non-trivial pair, (c) System 1 solving pair (b). rollout.npz holds the
-    frame after every step, so frames[i] is the frame after step i + 1; step 0 is the start frame."""
-    triv, roll = np.load(data / "already_solved.npz"), np.load(data / "rollout.npz")
+    """(a) an already-solved pair, (b) a non-trivial pair, (c) System 1 solving pair (b). rollout_render.npz holds
+    the frame after every step, so frames[i] is the frame after step i + 1; step 0 is the start frame."""
+    triv, roll = np.load(data / "already_solved_render.npz"), np.load(data / "rollout_render.npz")
     tinfo = json.loads((data / "already_solved.json").read_text())
     rinfo = json.loads((data / "rollout.json").read_text())
     frames = [roll["start"], *roll["frames"]]
     steps = np.unique(np.linspace(0, len(frames) - 1, n_roll).round().astype(int))
-    fig = plt.figure(figsize=(6.4, 2.95))
-    gs = fig.add_gridspec(2, n_roll, hspace=0.62, wspace=0.07)
-    top = [fig.add_subplot(gs[0, i]) for i in (0, 1, 4, 5)]
+    fig = plt.figure(figsize=(6.4, 3.55))
+    outer = fig.add_gridspec(2, 1, height_ratios=[1.42, 1.0], hspace=0.42)
+    gt = outer[0].subgridspec(1, 5, width_ratios=[1, 1, 0.22, 1, 1], wspace=0.06)
+    gs = outer[1].subgridspec(1, n_roll, wspace=0.07)
+    top = [fig.add_subplot(gt[0, i]) for i in (0, 1, 3, 4)]
     _frame(top[0], triv["start"], "start")
     _frame(top[1], triv["goal"], f"goal ({tinfo['goal_offset']} steps later)")
     _frame(top[2], roll["start"], "start")
@@ -176,16 +179,15 @@ def fig_task(data: Path, out: Path, n_roll: int = 6) -> None:
     for ax, title, note in ((top[0], "(a) already solved at the start", f"cube moved {100 * tinfo['cube_moved_m']:.0f} cm"),
                             (top[2], "(b) a pair that needs work", f"cube moved {100 * rinfo['cube_moved_m']:.0f} cm")):
         pos = ax.get_position()
-        fig.text(pos.x0, pos.y1 + 0.085, title, fontsize=8.5, color=INK, ha="left")
-        fig.text(pos.x0, pos.y0 - 0.02, note, fontsize=7, color=MUTED, ha="left", va="top")
-    row = [fig.add_subplot(gs[1, i]) for i in range(len(steps))]
+        fig.text(pos.x0, pos.y1 + 0.06, title, fontsize=8.5, color=INK, ha="left")
+        fig.text(pos.x0, pos.y0 - 0.012, note, fontsize=7, color=MUTED, ha="left", va="top")
+    row = [fig.add_subplot(gs[0, i]) for i in range(len(steps))]
     for ax, t in zip(row, steps, strict=True):
         last = t == len(frames) - 1
         _frame(ax, frames[t], "start" if t == 0 else (f"step {t}: success" if last else f"step {t}"),
                edge=BLUE if last else MUTED)
     pos = row[0].get_position()
-    fig.text(pos.x0, pos.y1 + 0.085, "(c) System 1 solving pair (b)", fontsize=8.5, color=INK,
-             ha="left")
+    fig.text(pos.x0, pos.y1 + 0.06, "(c) System 1 solving pair (b)", fontsize=8.5, color=INK, ha="left")
     _save(fig, out)
 
 
@@ -205,7 +207,7 @@ def _arrow(ax, p, q, *, color=INK, dashed=False, style="-|>", conn="arc3"):
 
 
 def fig_system(data: Path, out: Path) -> None:
-    roll = np.load(data / "rollout.npz")
+    roll = np.load(data / "rollout_render.npz")
     fig = plt.figure(figsize=(6.4, 2.9))
     ax = fig.add_axes([0, 0, 1, 1])
     ax.set_xlim(0, 64)
@@ -265,7 +267,7 @@ if __name__ == "__main__":
     made = {"fig3_success.png": lambda p: fig_success(gpu["success"], p),
             "fig4_latent.png": lambda p: fig_latent(gpu["diagnostics"], p),
             "fig5_memory.png": lambda p: fig_memory(gpu["success"], p)}
-    if (data / "rollout.npz").exists() and (data / "already_solved.npz").exists():
+    if (data / "rollout_render.npz").exists() and (data / "already_solved_render.npz").exists():
         made |= {"fig1_system.png": lambda p: fig_system(data, p), "fig2_task.png": lambda p: fig_task(data, p)}
     for name, draw in made.items():
         draw(out_dir / name)

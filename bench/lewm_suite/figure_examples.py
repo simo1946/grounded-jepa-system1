@@ -3,7 +3,8 @@
 Among the 50 pairs of the authors' protocol drawn in the CPU re-run (the random-policy result file records them and
 which ones are already solved), takes the already-solved pair whose arm moves farthest between the start and the
 goal frame: the frames differ, yet the goal condition (cube within 4 cm) already holds at the start. Writes
-already_solved.npz (the two 64-pixel frames) and already_solved.json (which pair, cube and arm displacement).
+already_solved.npz (the two 64-pixel frames and their simulator states) and already_solved.json (which pair, cube
+and arm displacement).
 
     python figure_examples.py --random-result ../../results/cpu_rerun/cube__random__off25_bud50_es42.json \
         --data external/cube_data/cube_eval.h5 --out ../../paper/figures/data
@@ -30,8 +31,9 @@ def main(random_result: Path, data: Path, out: Path) -> dict:
         pick = int(np.argmax(np.where(triv, arm_moved, -1.0)))
         s_row, g_row = rows[pick]
         start, goal = f["pixels"][s_row], f["pixels"][g_row]
+        st = {f"{w}_{k}": f[k][r] for k in ("qpos", "qvel") for w, r in (("start", s_row), ("goal", g_row))}
     out.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(out / "already_solved.npz", start=start, goal=goal)
+    np.savez_compressed(out / "already_solved.npz", start=start, goal=goal, **st)
     info = {"source": random_result.name, "pair_index": pick, "episode": int(eps[pick]),
             "start_step": int(starts[pick]), "goal_offset": int(offset), "already_solved": bool(triv[pick]),
             "arm_moved_m": float(arm_moved[pick]), "cube_moved_m": float(cube_moved[pick]),

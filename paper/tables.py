@@ -131,7 +131,7 @@ def gpu_success():
                 cells.append(_mean_se(p, ev))
         cells.append(f"{{{{num1: gpu_cube.diagnostics.{cfg}.cube_probe_cm}}}}")
         rows.append(cells)
-    return caption, header, rows, _w(.19, .12, .12, .11, .12, .12, .11, .11)
+    return caption, header, rows, _w(.24, .11, .11, .10, .11, .12, .11, .10)
 
 
 # ---------------------------------------------------------------------------------------------- Table 4
@@ -160,7 +160,7 @@ def per_seed():
             cells.append(f"{{{{num1: {q}.a_pct}}}} vs {{{{num1: {q}.b_pct}}}} ({{{{p: {q}.p_mcnemar}}}})")
         cells.append(_ci(p))
         rows.append(cells)
-    return caption, header, rows, _w(.24, .18, .18, .18, .22)
+    return caption, header, rows, _w(.21, .19, .19, .19, .22)
 
 
 # ---------------------------------------------------------------------------------------------- Table 5

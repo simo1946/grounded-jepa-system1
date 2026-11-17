@@ -6,7 +6,8 @@ Nothing in the evaluation changes: the run only adds a recorder to the world's p
 result file to the output folder instead of $STABLEWM_HOME/results.
 
 Example pair: among the pairs System 1 solves, the one whose cube moves farthest between the start and the goal
-frame. Writes rollout.npz (frames of that pair until success, its goal frame and its start/goal states) and
+frame. Writes rollout.npz (frames and simulator states of that pair until success, its start and goal frames and
+states) and
 rollout.json (which pair, outcome, and whether the 50 outcomes equal those of the re-run's result file).
 
     python figure_rollout.py --out ../../paper/figures/data --check ../../results/cpu_rerun/<C3 s1 k1 file>.json
@@ -29,7 +30,7 @@ def record(world_cls, store: list) -> None:
     orig = world_cls._run
 
     def run(self, *a, on_step=None, **k):
-        rec = {"frames": [], "done": []}
+        rec = {"frames": [], "done": [], "qpos": [], "qvel": []}
         store.append(rec)
 
         def step(world, mask):
@@ -37,6 +38,9 @@ def record(world_cls, store: list) -> None:
                 on_step(world, mask)
             px = np.asarray(world.infos["pixels"])
             rec["frames"].append((px[:, -1] if px.ndim == 5 else px).copy())
+            for k in ("qpos", "qvel"):                         # simulator state, to render the figure at high resolution
+                v = np.asarray(world.infos[k])
+                rec[k].append((v[:, -1] if v.ndim == 3 else v).copy())
             rec["done"].append(np.asarray(world.terminateds, bool).copy())
         return orig(self, *a, on_step=step, **k)
     world_cls._run = run
@@ -54,11 +58,12 @@ def main(out: Path, check: Path | None) -> dict:
     res = evaluate.main("cube", SPEC, SEED, 50, 42, "cube", "cube_eval", None, None, "cpu", 10, controller="s1", k=1,
                         env_chunk=5, pairs="nontrivial", policy_file=POLICY)
     # one recording per batch of environments, in pair order
-    frames, done = [], []
+    frames, done, qpos, qvel = [], [], [], []
     for rec in store:
-        f, d = np.stack(rec["frames"], 1), np.stack(rec["done"], 1)          # [envs, steps, ...]
-        frames.extend(f)
-        done.extend(d)
+        frames.extend(np.stack(rec["frames"], 1))                             # [envs, steps, ...]
+        done.extend(np.stack(rec["done"], 1))
+        qpos.extend(np.stack(rec["qpos"], 1))
+        qvel.extend(np.stack(rec["qvel"], 1))
     succ = np.asarray(res["successes"], bool)
     eps, starts, offset = res["episodes_idx"], res["start_steps"], res["goal_offset"]
 
@@ -73,11 +78,15 @@ def main(out: Path, check: Path | None) -> dict:
         pick = int(np.argmax(np.where(succ, moved, -1.0)))
         s_row, g_row = rows[pick]
         goal_px, start_px = pixels[g_row], pixels[s_row]
+        state_rows = {k: f[k][[s_row, g_row]] for k in ("qpos", "qvel")}
         start_state = {"cube": cube[s_row].tolist(), "effector": effector[s_row].tolist()}
         goal_state = {"cube": cube[g_row].tolist(), "effector": effector[g_row].tolist()}
     first = int(np.argmax(done[pick])) if done[pick].any() else len(done[pick]) - 1
     roll = frames[pick][: first + 1]
-    np.savez_compressed(out / "rollout.npz", frames=roll, goal=goal_px, start=start_px)
+    np.savez_compressed(out / "rollout.npz", frames=roll, goal=goal_px, start=start_px,
+                        qpos=qpos[pick][: first + 1], qvel=qvel[pick][: first + 1],
+                        start_qpos=state_rows["qpos"][0], start_qvel=state_rows["qvel"][0],
+                        goal_qpos=state_rows["qpos"][1], goal_qvel=state_rows["qvel"][1])
     info = {"spec": SPEC, "config": "C3", "seed": SEED, "policy_file": POLICY, "controller": "s1", "k": 1,
             "pair_index": pick, "episode": int(eps[pick]), "start_step": int(starts[pick]),
             "goal_offset": int(offset), "success": bool(succ[pick]), "steps_to_success": first + 1,

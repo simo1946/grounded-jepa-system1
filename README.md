@@ -33,7 +33,7 @@ export MUJOCO_GL=egl
 export STABLEWM_HOME=$PWD/bench/lewm_suite/swm_home    # data, checkpoints, caches and results go here
 ```
 
-## Reproduce the GPU study (Tables 2–4, Figures 2–3)
+## Reproduce the GPU study (Tables 2–4, Figures 3–5)
 
 The main study ran on a free Google Colab T4. Build the notebook and run it there:
 

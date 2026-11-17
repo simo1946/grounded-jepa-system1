@@ -3029,10 +3029,6 @@ value = "5.7"
 reason = "section number"
 
 [[numbers.allow]]
-value = "3,000"
-reason = "step at which the TwoRoom LeWM seed-0 training resumed after a Colab disconnect (training log; the result files do not record it)"
-
-[[numbers.allow]]
 value = "360"
 reason = "setting of the study: most outcomes in one TwoRoom contrast (2 models x 3 seeds x 60 pairs)"
 
