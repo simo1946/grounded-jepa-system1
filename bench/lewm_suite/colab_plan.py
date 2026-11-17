@@ -205,7 +205,7 @@ def build(profile: str, tiers: list[int], only: list[str] | None, home: Path, wo
         ev("sel16", s1, k=16)
         ev("sel16n", s1, k=16, std=0.25)
         ev("gate", s1, controller="s1s2", k=16)
-        if cfg_id in cem_set:
+        if cfg_id in cem_set or "cem_all" in extra:          # cem_all: follow-up, CEM on every configuration
             ev("cem", [f"train:{tag}"], controller="cem")
         if task != "cube" or "appendix" in extra:           # authors' protocol (every pair): comparable to published numbers
             ev("s1_all", s1, pairs_="all")
@@ -376,23 +376,25 @@ def main() -> None:
                     "parts; a re-run restores them instead of collecting again")
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--run", action="store_true")
-    ap.add_argument("--extra", nargs="*", default=[], choices=["appendix"],
-                    help="appendix = Cube on the "
-                         "authors' protocol (every pair: System 1 for all models, CEM for the CEM configs)")
+    ap.add_argument("--extra", nargs="*", default=[], choices=["appendix", "cem_all"],
+                    help="appendix = Cube on the authors' protocol (every pair: System 1 for all models, CEM for the "
+                         "CEM configs); cem_all = follow-up: CEM on every configuration, not only the profile's CEM set")
     ap.add_argument("--only-extra", action="store_true", help="list/run only the extra study and what it needs")
     a = ap.parse_args()
     home = Path(a.home)
     jobs = build(a.profile, a.tiers, a.configs, home, a.workers, a.env_chunk,
                  Path(a.backup_dir) if a.backup_dir else None, task=a.task, extra=tuple(a.extra))
-    if a.only_extra:                                          # the extra jobs plus their dependency closure
-        by = {j.name: j for j in jobs}
-        keep, todo = set(), [j.name for j in jobs
-                             if "appendix" in a.extra and j.name.endswith((":s1_all", ":cem_all"))]
+    if a.only_extra:                     # the extra jobs plus what they still need (finished jobs end the search,
+        by = {j.name: j for j in jobs}   # so data that was deleted after training is not collected again)
+        ends = (":s1_all", ":cem_all") if "appendix" in a.extra else ()
+        ends += (":cem",) if "cem_all" in a.extra else ()
+        keep, todo = set(), [j.name for j in jobs if ends and j.name.endswith(ends)]
         while todo:
             nme = todo.pop()
             if nme not in keep:
                 keep.add(nme)
-                todo += by[nme].deps
+                if not by[nme].done():
+                    todo += by[nme].deps
         jobs = [j for j in jobs if j.name in keep]
     if a.data_only:
         jobs = [j for j in jobs if j.name.startswith(("collect:", "merge:"))]

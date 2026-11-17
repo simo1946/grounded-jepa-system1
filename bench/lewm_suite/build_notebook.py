@@ -420,6 +420,47 @@ if RUN_APPENDIX:
 '''
 
 
+CEM_ALL_INTRO = r"""
+## 14. CEM on every Cube configuration (follow-up, optional)
+
+The main run planned with CEM only on C1 and C5. This adds CEM on C2 and C3 (three seeds) and on C6 and C7 (seed 0)
+with the same settings, so every configuration has a planning baseline. It only evaluates existing models: it needs
+the trained checkpoints on Drive and `cube_eval.h5`, and it stops without running anything if a model is missing.
+Run it in its own session: sections 1–6, then this one with `RUN_CEM_ALL = True` (about 8 runs of 15–20 min,
+two at a time). It saves a zip of the new result files on Drive; send that zip back.
+"""
+
+CEM_ALL = r'''
+RUN_CEM_ALL = False
+if RUN_CEM_ALL:
+    cem = [sys.executable, "colab_plan.py", "--profile", PROFILE, "--home", str(HOME), "--tiers", "1", "2", "3",
+           "--configs", "C2", "C3", "C6", "C7", "--extra", "cem_all", "--only-extra", "--workers", str(workers),
+           "--gpu-slots", str(gpu_slots), "--env-chunk", str(env_chunk)]
+    b = BACKUP / "cube_eval.h5"                                   # the evaluation data, from the Drive backup
+    if b.exists() and not (HOME / "datasets" / "cube_eval.h5").exists():
+        print("restoring cube_eval.h5"); shutil.copy2(b, HOME / "datasets" / "cube_eval.h5")
+    plan = subprocess.run(cem + ["--list"], cwd=SUITE, capture_output=True, text=True).stdout
+    print(plan)
+    missing = [l.split()[-1] for l in plan.splitlines() if l.startswith("pending") and not l.endswith(":cem")]
+    if missing:
+        raise RuntimeError(f"not evaluating: these would have to be trained or collected again: {missing}. "
+                           "Check that Drive holds the checkpoints and cube_eval.h5 of the main run.")
+    run(cem + ["--run"], cwd=SUITE, check=False)
+    import zipfile, time
+    def is_cem(f):                                                # CEM result files carry controller "cem"
+        try:
+            return json.loads(f.read_text()).get("controller") == "cem"
+        except (ValueError, OSError):
+            return False
+    new = sorted(f for f in (HOME / "results").glob("cube__*.json") if is_cem(f))
+    zpath = DRIVE / f"gpu_study_cem_all_{tag}_{time.strftime('%Y%m%d-%H%M')}.zip"
+    with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as z:
+        for f in new:
+            z.write(f, f.relative_to(HOME))
+    print("wrote", zpath, f"with {len(new)} CEM result files")
+'''
+
+
 OUTRO = r"""
 ## Reading the results
 
@@ -455,6 +496,7 @@ def build(path: Path) -> None:
                 md("### 12b. Run (second environment)"), code(TASK2_MAIN.strip()),
                 md("### 12c. Analysis and export (second environment)"), code(TASK2_ANALYSIS.strip()),
                 md(APPENDIX_INTRO.strip()), code(APPENDIX.strip()),
+                md(CEM_ALL_INTRO.strip()), code(CEM_ALL.strip()),
                 md(OUTRO.strip())]
     path.parent.mkdir(parents=True, exist_ok=True)
     nbf.write(nb, path)
