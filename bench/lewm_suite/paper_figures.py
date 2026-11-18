@@ -55,8 +55,6 @@ def _axes(ax, ylabel: str | None, ymax: float = 100, room: float = 0) -> None:
     if room:
         ax.spines["left"].set_bounds(0, ymax)
         ax.set_yticks(np.linspace(0, ymax, 6))
-    ax.yaxis.grid(True, color=GRID, linewidth=0.6)
-    ax.set_axisbelow(True)
     ax.tick_params(axis="x", length=0)
     if ylabel:
         ax.set_ylabel(ylabel)
