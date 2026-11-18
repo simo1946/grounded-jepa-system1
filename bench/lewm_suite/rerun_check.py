@@ -40,17 +40,27 @@ def main(profile: str, home: Path, job_name: str, task: str) -> dict:
         if not link.exists():
             link.symlink_to((home / d).resolve(), target_is_directory=True)
     new = check_home / "results" / stored.name
-    new.unlink(missing_ok=True)                                 # a leftover of an earlier check
-    subprocess.run(job.cmd, cwd=HERE, env={**os.environ, "STABLEWM_HOME": str(check_home)}, check=True)
+    if new.exists():                                            # finished by an earlier, interrupted check
+        print(f"reusing the re-run already in {new}", flush=True)
+    else:
+        subprocess.run(job.cmd, cwd=HERE, env={**os.environ, "STABLEWM_HOME": str(check_home)}, check=True)
     a, b = json.loads(stored.read_text()), json.loads(new.read_text())
-    if a["episodes_idx"] != b["episodes_idx"] or a["start_steps"] != b["start_steps"]:
-        raise RuntimeError("the re-run drew different pairs: not comparable")
+    keys = [k for k in ("run", "controller", "num_eval", "eval_seed", "pairs", "goal_offset", "eval_budget")
+            if a.get(k) != b.get(k)]
+    if keys:
+        raise RuntimeError(f"the re-run differs from the stored evaluation in {keys}: not comparable")
+    if "episodes_idx" in a:
+        if a["episodes_idx"] != b["episodes_idx"] or a["start_steps"] != b["start_steps"]:
+            raise RuntimeError("the re-run drew different pairs: not comparable")
+        pairs_check = "pairs recorded in both files and identical"
+    else:   # results written before pairs were recorded: same evaluation data, seed and draw, so the same order
+        pairs_check = "stored file predates pair recording; pairs matched by order (same evaluation data and seed)"
     sa, sb = a["successes"], b["successes"]
     res = {"job": job_name, "result_file": stored.name, "pairs": len(sa), "stored_solved": int(sum(sa)),
            "rerun_solved": int(sum(sb)), "same_outcome": int(sum(x == y for x, y in zip(sa, sb, strict=True))),
            "stored_only": int(sum(x and not y for x, y in zip(sa, sb, strict=True))),
            "rerun_only": int(sum(y and not x for x, y in zip(sa, sb, strict=True))),
-           "training_data": str((home / "datasets" / f"{task}.h5").resolve())}
+           "pairs_check": pairs_check, "training_data": str((home / "datasets" / f"{task}.h5").resolve())}
     out = home / "results" / "checks" / f"{job_name.replace(':', '__')}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({**res, "rerun": b}, indent=1))
