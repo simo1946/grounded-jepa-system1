@@ -59,6 +59,12 @@ Pipeline per configuration: `collect.py` → `merge_h5.py` → `train.py` (world
 Configurations (`colab_plan.py: CONFIGS`): C1 `lewm`; C2 `lewm+idm+sa`; C3 `lewm+idm+sa+obj`;
 C5 `hybrid+idm+sa+obj`; C6/C7 add `+arl`. Model specs are parsed by `models.py: Spec`.
 
+Section 14 is a follow-up: CEM on C2, C3 (three seeds) and C6, C7 (seed 0), which the main run left out
+(`colab_plan.py --extra cem_all`). Evaluations z-score actions with statistics of the training data, which had been
+deleted from Drive after the main run; the collector does not reproduce the same episodes from a seed, so it was
+collected again with the same seeds as a second sample, and `rerun_check.py` re-runs the stored CEM evaluation of C1,
+seed 0, with it and compares the outcomes pair by pair (`results/checks/`).
+
 ## CPU follow-up studies (Sections 5.1, 5.2 and 5.6)
 
 These run on a 2-CPU machine at the CPU-study scale (400/80 episodes, 2,000 world-model steps). Their first result

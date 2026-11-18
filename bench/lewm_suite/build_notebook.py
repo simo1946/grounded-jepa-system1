@@ -391,7 +391,7 @@ APPENDIX_INTRO = r"""
 
 This scores every Cube model on the authors' own protocol (every start/goal pair, for Paper 1's appendix): System 1 for C1, C2, C3, C5 and CEM for C1, C5.
 Run it in its own session: sections 1–6, then this one with `RUN_APPENDIX = True`.
-After it finishes, the Cube training data is no longer needed: the cell lists what can be deleted from Drive to free space (models, results and the small evaluation set stay).
+After it finishes, the cell lists the collection parts that can be deleted from Drive. Keep `cube.h5`: every evaluation z-scores actions with statistics of the training data.
 """
 
 APPENDIX = r'''
@@ -411,12 +411,12 @@ if RUN_APPENDIX:
     if any(l.startswith("pending") for l in left.splitlines()):
         print("Some jobs are not finished yet: re-run this cell before deleting any Cube data.")
     else:
-        big = [f for f in (BACKUP / "cube.h5", BACKUP / "parts") if f.exists()]
-        print("All Cube runs are done. To free Drive space you can now delete (training data only):")
+        big = [f for f in (BACKUP / "parts",) if f.exists()]
+        print("All Cube runs are done. To free Drive space you can delete the collection parts:")
         for f in big:
             size = sum(x.stat().st_size for x in f.rglob("*")) if f.is_dir() else f.stat().st_size
             print(f"  {f}  ({size / 2**30:.2f} GB)")
-        print("Keep cube_eval.h5 (small), checkpoints/ and results/. Empty the Drive bin afterwards.")
+        print("Keep cube.h5 (evaluations need its action statistics), cube_eval.h5, checkpoints/ and results/.")
 '''
 
 
@@ -424,40 +424,69 @@ CEM_ALL_INTRO = r"""
 ## 14. CEM on every Cube configuration (follow-up, optional)
 
 The main run planned with CEM only on C1 and C5. This adds CEM on C2 and C3 (three seeds) and on C6 and C7 (seed 0)
-with the same settings, so every configuration has a planning baseline. It only evaluates existing models: it needs
-the trained checkpoints on Drive and `cube_eval.h5`, and it stops without running anything if a model is missing.
-Run it in its own session: sections 1–6, then this one with `RUN_CEM_ALL = True` (about 8 runs of 15–20 min,
-two at a time). It saves a zip of the new result files on Drive; send that zip back.
+with the same settings, so every configuration has a planning baseline. It evaluates the existing models only.
+
+Evaluations z-score actions with statistics of the **training data** (`cube.h5`). If that file is gone from Drive,
+this cell first collects it again with the same collector and seeds (24 parts of 25 episodes, about 4 h; each
+finished part is saved to Drive, so after a disconnect re-run the cell and it resumes). The collector does not
+reproduce the same episodes from a seed, so the new file is a second sample of the same distribution. To measure
+what that changes, the cell re-runs the stored CEM evaluation of C1, seed 0, and compares the two results pair by
+pair before running the new evaluations.
+
+Run it in its own session: sections 1–6, then this one with `RUN_CEM_ALL = True`. At the end it saves a zip of the
+new result files and the check on Drive; send that zip back.
 """
 
 CEM_ALL = r'''
 RUN_CEM_ALL = False
 if RUN_CEM_ALL:
+    import zipfile, time
+    for name in ("cube_eval.h5", "cube.h5"):                     # restore from the Drive backup when present
+        b = BACKUP / name
+        if b.exists() and not (HOME / "datasets" / name).exists():
+            print("restoring", name); shutil.copy2(b, HOME / "datasets" / name)
+    if not (HOME / "datasets" / "cube_eval.h5").exists():
+        raise RuntimeError("cube_eval.h5 is missing from Drive: the evaluation pairs cannot be rebuilt identically")
+    recollected = BACKUP / "cube.h5.RECOLLECTED.txt"
+    if not (HOME / "datasets" / "cube.h5").exists():             # training data deleted: collect it again
+        PARTS = BACKUP / "parts"
+        data_plan = [sys.executable, "colab_plan.py", "--profile", PROFILE, "--home", str(HOME),
+                     "--workers", str(max(workers, cpus)), "--backup-dir", str(PARTS)]
+        run(data_plan + ["--data-only", "--run"], cwd=SUITE)
+        src, dst = HOME / "datasets" / "cube.h5", BACKUP / "cube.h5"
+        if not src.exists():
+            raise RuntimeError("collection not finished: re-run this cell to resume")
+        shutil.copy2(src, dst.with_name(dst.name + ".tmp")); dst.with_name(dst.name + ".tmp").replace(dst)
+        recollected.write_text(f"cube.h5 collected again on {time.strftime('%Y-%m-%d')} (first copy deleted); "
+                               "same collector and seeds, not the same episodes\n")
+        for part in PARTS.glob("cube_p*.h5"):
+            part.unlink()
+    check = HOME / "results" / "checks" / "eval__C1s0__cem.json"
+    if recollected.exists() and not check.exists():              # what the new training data changes
+        run([sys.executable, "rerun_check.py", "--profile", PROFILE, "--home", str(HOME), "--job", "eval:C1s0:cem"],
+            cwd=SUITE)
     cem = [sys.executable, "colab_plan.py", "--profile", PROFILE, "--home", str(HOME), "--tiers", "1", "2", "3",
            "--configs", "C2", "C3", "C6", "C7", "--extra", "cem_all", "--only-extra", "--workers", str(workers),
            "--gpu-slots", str(gpu_slots), "--env-chunk", str(env_chunk)]
-    b = BACKUP / "cube_eval.h5"                                   # the evaluation data, from the Drive backup
-    if b.exists() and not (HOME / "datasets" / "cube_eval.h5").exists():
-        print("restoring cube_eval.h5"); shutil.copy2(b, HOME / "datasets" / "cube_eval.h5")
     plan = subprocess.run(cem + ["--list"], cwd=SUITE, capture_output=True, text=True).stdout
     print(plan)
     missing = [l.split()[-1] for l in plan.splitlines() if l.startswith("pending") and not l.endswith(":cem")]
     if missing:
         raise RuntimeError(f"not evaluating: these would have to be trained or collected again: {missing}. "
-                           "Check that Drive holds the checkpoints and cube_eval.h5 of the main run.")
+                           "Check that Drive holds the checkpoints of the main run.")
     run(cem + ["--run"], cwd=SUITE, check=False)
-    import zipfile, time
     def is_cem(f):                                                # CEM result files carry controller "cem"
         try:
             return json.loads(f.read_text()).get("controller") == "cem"
         except (ValueError, OSError):
             return False
     new = sorted(f for f in (HOME / "results").glob("cube__*.json") if is_cem(f))
+    new += sorted((HOME / "results" / "checks").glob("*.json")) + ([recollected] if recollected.exists() else [])
     zpath = DRIVE / f"gpu_study_cem_all_{tag}_{time.strftime('%Y%m%d-%H%M')}.zip"
     with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as z:
         for f in new:
-            z.write(f, f.relative_to(HOME))
-    print("wrote", zpath, f"with {len(new)} CEM result files")
+            z.write(f, f.name if f == recollected else f.relative_to(HOME))
+    print("wrote", zpath, f"with {len(new)} files")
 '''
 
 
