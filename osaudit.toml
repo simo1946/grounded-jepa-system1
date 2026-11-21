@@ -1046,6 +1046,14 @@ value = "17%"
 expr = "gpu_cube.success.C5.cem.mean"
 
 [[numbers.derive]]
+value = "12%"
+expr = "gpu_cube.success.C3.cem.mean"
+
+[[numbers.derive]]
+value = "20%"
+expr = "gpu_cube.success.C7.cem.mean"
+
+[[numbers.derive]]
 value = "0.024"
 expr = "cpu_rerun.timing.s1.median_s"
 
