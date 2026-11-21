@@ -424,7 +424,8 @@ CEM_ALL_INTRO = r"""
 ## 14. CEM on every Cube configuration (follow-up, optional)
 
 The main run planned with CEM only on C1 and C5. This adds CEM on C2 and C3 (three seeds) and on C6 and C7 (seed 0)
-with the same settings, so every configuration has a planning baseline. It evaluates the existing models only.
+with the same settings, so every configuration has a planning baseline, and CEM on every pair of the authors'
+protocol for C2 and C3 (Appendix A). It evaluates the existing models only; finished evaluations are skipped.
 
 Evaluations z-score actions with statistics of the **training data** (`cube.h5`). If that file is gone from Drive,
 this cell first collects it again with the same collector and seeds (24 parts of 25 episodes, about 4 h; each
@@ -465,16 +466,19 @@ if RUN_CEM_ALL:
     if recollected.exists() and not check.exists():              # what the new training data changes
         run([sys.executable, "rerun_check.py", "--profile", PROFILE, "--home", str(HOME), "--job", "eval:C1s0:cem"],
             cwd=SUITE)
-    cem = [sys.executable, "colab_plan.py", "--profile", PROFILE, "--home", str(HOME), "--tiers", "1", "2", "3",
-           "--configs", "C2", "C3", "C6", "C7", "--extra", "cem_all", "--only-extra", "--workers", str(workers),
-           "--gpu-slots", str(gpu_slots), "--env-chunk", str(env_chunk)]
-    plan = subprocess.run(cem + ["--list"], cwd=SUITE, capture_output=True, text=True).stdout
-    print(plan)
-    missing = [l.split()[-1] for l in plan.splitlines() if l.startswith("pending") and not l.endswith(":cem")]
-    if missing:
-        raise RuntimeError(f"not evaluating: these would have to be trained or collected again: {missing}. "
-                           "Check that Drive holds the checkpoints of the main run.")
-    run(cem + ["--run"], cwd=SUITE, check=False)
+    base = [sys.executable, "colab_plan.py", "--profile", PROFILE, "--home", str(HOME), "--tiers", "1", "2", "3",
+            "--only-extra", "--workers", str(workers), "--gpu-slots", str(gpu_slots), "--env-chunk", str(env_chunk)]
+    runs = [base + ["--configs", "C2", "C3", "C6", "C7", "--extra", "cem_all"],          # non-trivial pairs (Table 3)
+            base + ["--configs", "C2", "C3", "--extra", "cem_all", "appendix"]]          # every pair (Appendix A)
+    for cem in runs:
+        plan = subprocess.run(cem + ["--list"], cwd=SUITE, capture_output=True, text=True).stdout
+        print(plan)
+        missing = [l.split()[-1] for l in plan.splitlines()
+                   if l.startswith("pending") and not l.endswith((":cem", ":cem_all"))]
+        if missing:
+            raise RuntimeError(f"not evaluating: these would have to be trained or collected again: {missing}. "
+                               "Check that Drive holds the checkpoints of the main run.")
+        run(cem + ["--run"], cwd=SUITE, check=False)
     def is_cem(f):                                                # CEM result files carry controller "cem"
         try:
             return json.loads(f.read_text()).get("controller") == "cem"

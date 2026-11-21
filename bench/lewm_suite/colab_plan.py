@@ -209,7 +209,7 @@ def build(profile: str, tiers: list[int], only: list[str] | None, home: Path, wo
             ev("cem", [f"train:{tag}"], controller="cem")
         if task != "cube" or "appendix" in extra:           # authors' protocol (every pair): comparable to published numbers
             ev("s1_all", s1, pairs_="all")
-            if cfg_id in cem_set:
+            if cfg_id in cem_set or "cem_all" in extra:
                 ev("cem_all", [f"train:{tag}"], controller="cem", pairs_="all")
         if cfg_id in memory_set and task == "cube":
             ev("rec1", s1, receding=1)
@@ -378,7 +378,8 @@ def main() -> None:
     ap.add_argument("--run", action="store_true")
     ap.add_argument("--extra", nargs="*", default=[], choices=["appendix", "cem_all"],
                     help="appendix = Cube on the authors' protocol (every pair: System 1 for all models, CEM for the "
-                         "CEM configs); cem_all = follow-up: CEM on every configuration, not only the profile's CEM set")
+                         "CEM configs); cem_all = follow-up: CEM on every configuration, not only the profile's CEM set "
+                         "(with appendix also on every pair)")
     ap.add_argument("--only-extra", action="store_true", help="list/run only the extra study and what it needs")
     a = ap.parse_args()
     home = Path(a.home)
