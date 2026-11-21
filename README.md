@@ -63,7 +63,8 @@ Section 14 is a follow-up: CEM on C2, C3 (three seeds) and C6, C7 (seed 0), whic
 (`colab_plan.py --extra cem_all`). Evaluations z-score actions with statistics of the training data, which had been
 deleted from Drive after the main run; the collector does not reproduce the same episodes from a seed, so it was
 collected again with the same seeds as a second sample, and `rerun_check.py` re-runs the stored CEM evaluation of C1,
-seed 0, with it and compares the outcomes pair by pair (`results/checks/`).
+seed 0, with it and compares the outcomes pair by pair: 59 of 60 pairs had the same outcome (stored 11 solved,
+re-run 10; `results/gpu_study/checks/`). The follow-up ran on the same GPU type (T4) and finished on 2026-11-21.
 
 ## CPU follow-up studies (Sections 5.1, 5.2 and 5.6)
 

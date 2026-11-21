@@ -123,9 +123,7 @@ def gpu_success():
         p = f"gpu_cube.success.{cfg}"
         cells = [name]
         for ev in ("s1_nt", "s1_pk", "s1_50", "hier_50", "sel16", "cem"):
-            if cfg in ("C2", "C3", "C6", "C7") and ev == "cem":
-                cells.append("–")
-            elif cfg in ("C6", "C7"):
+            if cfg in ("C6", "C7"):
                 cells.append(f"{{{{num1: {p}.{ev}.mean}}}}")
             else:
                 cells.append(_mean_se(p, ev))
