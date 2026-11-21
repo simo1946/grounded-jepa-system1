@@ -1194,8 +1194,8 @@
     "sha256": "2017e22baa1ed4b36ff71f223d855806daa900f9e8cdebec1a935ed9f512d7e6"
    }
   ],
-  "commit": "32880da201f1abe5fbb8d215d9c48ed7bf836a7b",
-  "now": "2026-11-13T19:54:01+00:00",
+  "commit": "3c54170dea2a3bdcbf368c0d298a9392cf2f6876",
+  "now": "2026-11-21T18:22:56+00:00",
   "osaudit": "0.7.0"
  }
 }

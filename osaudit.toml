@@ -510,6 +510,14 @@ value = "0.6"
 expr = "gpu_cube.success.C2.sel16.se"
 
 [[numbers.derive]]
+value = "16.1"
+expr = "gpu_cube.success.C2.cem.mean"
+
+[[numbers.derive]]
+value = "3.1"
+expr = "gpu_cube.success.C2.cem.se"
+
+[[numbers.derive]]
 value = "82.2"
 expr = "gpu_cube.success.C3.s1_nt.mean"
 
@@ -548,6 +556,14 @@ expr = "gpu_cube.success.C3.sel16.mean"
 [[numbers.derive]]
 value = "1.5"
 expr = "gpu_cube.success.C3.sel16.se"
+
+[[numbers.derive]]
+value = "11.7"
+expr = "gpu_cube.success.C3.cem.mean"
+
+[[numbers.derive]]
+value = "1.7"
+expr = "gpu_cube.success.C3.cem.se"
 
 [[numbers.derive]]
 value = "81.7"
@@ -622,6 +638,10 @@ value = "70.0"
 expr = "gpu_cube.success.C6.sel16.mean"
 
 [[numbers.derive]]
+value = "11.7"
+expr = "gpu_cube.success.C6.cem.mean"
+
+[[numbers.derive]]
 value = "2.0"
 expr = "gpu_cube.diagnostics.C6.cube_probe_cm"
 
@@ -644,6 +664,10 @@ expr = "gpu_cube.success.C7.hier_50.mean"
 [[numbers.derive]]
 value = "60.0"
 expr = "gpu_cube.success.C7.sel16.mean"
+
+[[numbers.derive]]
+value = "20.0"
+expr = "gpu_cube.success.C7.cem.mean"
 
 [[numbers.derive]]
 value = "2.2"
