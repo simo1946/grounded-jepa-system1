@@ -176,7 +176,7 @@ Code and text were written with the assistance of Claude (Anthropic).
 
 # Appendix A. The authors' standard protocol
 
-On the authors' protocol System 1 scores {{pct0: gpu_cube.success.C1.s1_all.mean}} (C1) to {{pct0: gpu_cube.success.C3.s1_all.mean}} (C3) and CEM {{pct0: gpu_cube.success.C1.cem_all.mean}} (C1) and {{pct0: gpu_cube.success.C5.cem_all.mean}} (C5), and the ranking of the models matches the non-trivial results (Table 8). Pairs are drawn from all held-out start/goal pairs (goal {{set: 25 | goal offset in steps}} steps ahead, budget {{set: 50 | step budget}}, {{set: 60 | evaluation pairs per seed, GPU study}} pairs per seed), so {{int: gpu_cube.standard_protocol.solved_at_start}} of the {{int: gpu_cube.standard_protocol.pairs}} pairs are solved at the start; mean ± SE over three seeds.
+On the authors' protocol System 1 scores {{pct0: gpu_cube.success.C1.s1_all.mean}} (C1) to {{pct0: gpu_cube.success.C3.s1_all.mean}} (C3) and CEM {{pct0: gpu_cube.success.C1.cem_all.mean}} (C1) to {{pct0: gpu_cube.success.C3.cem_all.mean}} (C3), and System 1's ranking of the models matches the non-trivial results (Table 8). Pairs are drawn from all held-out start/goal pairs (goal {{set: 25 | goal offset in steps}} steps ahead, budget {{set: 50 | step budget}}, {{set: 60 | evaluation pairs per seed, GPU study}} pairs per seed), so {{int: gpu_cube.standard_protocol.solved_at_start}} of the {{int: gpu_cube.standard_protocol.pairs}} pairs are solved at the start; mean ± SE over three seeds.
 
 TABLE: standard
 

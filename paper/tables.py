@@ -239,7 +239,7 @@ def standard():
     rows = []
     for cfg, name in CONFIG_ROWS[:4]:
         p = f"gpu_cube.success.{cfg}"
-        rows.append([name, _mean_se(p, "s1_all"), _mean_se(p, "cem_all") if cfg in ("C1", "C5") else "–"])
+        rows.append([name, _mean_se(p, "s1_all"), _mean_se(p, "cem_all")])
     return caption, header, rows, _w(.4, .3, .3)
 
 
