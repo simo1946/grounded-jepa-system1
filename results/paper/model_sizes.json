@@ -61,8 +61,8 @@
     "sha256": "68dbfdd4b28cb6caf10824678b2a8d62865ba17a4070c5c7816dedcfdbcade40"
    }
   ],
-  "commit": "3c54170dea2a3bdcbf368c0d298a9392cf2f6876",
-  "now": "2026-11-21T18:23:00+00:00",
+  "commit": "5a1ed7c093d846c2ae9c394a1b0b3f5f7c84777d",
+  "now": "2026-11-22T21:02:13+00:00",
   "osaudit": "0.7.0"
  }
 }

@@ -847,11 +847,11 @@
   "inputs": [
    {
     "path": "results/gpu_study/runs",
-    "sha256": "8832578abbd011d5c69b6064a9a2683eb07553ea1c3a9f2b9caa0c55ce01c684"
+    "sha256": "84df0c0a8d06045ef77e0035e047d9f7245fe2fcb4fafebab903daa8413f562c"
    }
   ],
-  "commit": "3c54170dea2a3bdcbf368c0d298a9392cf2f6876",
-  "now": "2026-11-21T18:22:54+00:00",
+  "commit": "5a1ed7c093d846c2ae9c394a1b0b3f5f7c84777d",
+  "now": "2026-11-22T21:02:05+00:00",
   "osaudit": "0.7.0"
  }
 }
