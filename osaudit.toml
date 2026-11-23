@@ -2726,6 +2726,20 @@ value = "0.73"
 expr = "model_sizes.policies.gcidm_ours_no_horizon / 1000000"
 
 [[numbers.allow]]
+value = "3479"
+reason = "part of the author's ORCID identifier, not a result"
+file = "paper/paper.pdf"
+line = 1
+occurrence = 1
+
+[[numbers.allow]]
+value = "3327"
+reason = "part of the author's ORCID identifier, not a result"
+file = "paper/paper.pdf"
+line = 1
+occurrence = 1
+
+[[numbers.allow]]
 value = "64"
 reason = "setting of the study: frame size in pixels"
 file = "paper/paper.pdf"

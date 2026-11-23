@@ -314,7 +314,8 @@ def parse(md: str, f: Formatter, tables) -> dict:
 
 def document_text(spec: dict) -> str:
     """The rendered text, block by block (table cells row by row), as a reader of the PDF meets it."""
-    parts = []
+    meta = spec.get("meta", {})
+    parts = [meta[k] for k in ("title", "author", "affil") if meta.get(k)]     # the title block, first on page 1
     for b in spec["blocks"]:
         if b["type"] == "table":
             parts.append("".join(r["t"] for r in b["caption"]))

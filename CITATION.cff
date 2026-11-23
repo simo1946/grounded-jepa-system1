@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this code or its results, please cite the paper as below."
+title: "Grounded JEPA World Models for Fast System-1 Control"
+type: software
+authors:
+  - family-names: Bonaccorsi
+    given-names: Simone
+    email: simone.bonaccorsi46@gmail.com
+    orcid: "https://orcid.org/0009-0007-3479-3327"
+repository-code: "https://github.com/simo1946/grounded-jepa-system1"
+license: MIT
+preferred-citation:
+  type: article
+  title: "Grounded JEPA World Models for Fast System-1 Control"
+  authors:
+    - family-names: Bonaccorsi
+      given-names: Simone
+      orcid: "https://orcid.org/0009-0007-3479-3327"
+  year: 2026
+  url: "https://github.com/simo1946/grounded-jepa-system1"
