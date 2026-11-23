@@ -119,10 +119,13 @@ Plan and dated addendum: `prereg_feedback.md`.
 
 Every number in the paper comes from a results file in `results/paper/`, written by `osaudit run` (command, input
 checksums and git commit recorded). `paper/build.py` prints the numbers from those files and writes `osaudit.toml`;
-[osaudit](https://github.com/ASSERT-KTH/osaudit) (`pip install osaudit==0.7.0`, Python 3.13+) then checks the PDF
-against the files and the files against the code:
+[osaudit](https://github.com/ASSERT-KTH/osaudit) (Python 3.13+) then checks the PDF against the files and the
+files against the code. Install it at the commit the build was made with: it requires every allowance to name the one
+printed number it justifies (page and occurrence), which `paper/scope_allowances.py` computes from osaudit's own
+reading of the PDF. The resulting `osaudit.toml` also passes osaudit 0.7.0 from PyPI.
 
 ```bash
+pip install "osaudit @ git+https://github.com/ASSERT-KTH/osaudit@79e3bb737266e3162f66e4f213a4e985975bd5fb"
 paper/reproduce.sh        # regenerate results/paper/*.json, the figures, paper.docx and paper.pdf, then run osaudit
 osaudit                   # the audit alone; prints nothing when every number is traced
 ```

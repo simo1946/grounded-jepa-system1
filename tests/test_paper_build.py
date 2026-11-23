@@ -8,14 +8,16 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "paper"))
 import build  # noqa: E402
+from scope_allowances import MARK, Site, _common_prefix, _common_suffix, contexts  # noqa: E402
 
 VALUES = {"v": {"share": 70.512, "neg": -19.44, "count": 42, "p_small": 3e-5, "p": 0.0061, "one": 1.0,
                 "whole": 55.0, "frac": 54.44, "list": [3, 4], "odd key": {"x": 2.0}}}
 
 
 def fmt(text: str) -> tuple[str, build.Ledger]:
+    """Formatted text without the locating marks, as it reaches the document."""
     ledger = build.Ledger()
-    return build.Formatter(VALUES, ledger).text(text), ledger
+    return MARK.sub("", build.Formatter(VALUES, ledger).text(text)), ledger
 
 
 def test_formats_and_derive_entries():
@@ -30,7 +32,7 @@ def test_formats_and_derive_entries():
 def test_p_values_floor_and_one():
     out, led = fmt("{{p: v.p_small}}; {{p: v.p}}; {{p: v.one}}")
     assert out == "< 0.001; 0.006; 1"
-    assert ("0.001", "reporting floor for p-values (smaller values are printed as < 0.001)", "") in led.allow
+    assert ("0.001", "reporting floor for p-values (smaller values are printed as < 0.001)") in led.allow
 
 
 def test_expressions_indices_and_quoted_keys():
@@ -51,9 +53,29 @@ def test_rejects_negative_with_unsigned_format():
 def test_settings_and_cited_numbers_become_allow_entries():
     out, led = fmt("{{set: 64 | frame size}} {{ext: 42 | [22] | their drop}} {{fact: 3,000 | log}}")
     assert out == "64 42 3,000"
-    assert ("64", "setting of the study: frame size", "") in led.allow
-    assert ("42", "reported by the cited work: their drop", "[22]") in led.allow
-    assert ("3,000", "log", "") in led.allow
+    assert ("64", "setting of the study: frame size") in led.allow
+    assert ("42", "reported by the cited work [22]: their drop") in led.allow
+    assert ("3,000", "log") in led.allow
+
+
+def test_every_allowed_number_is_marked_with_its_context():
+    ledger = build.Ledger()
+    text = build.Formatter(VALUES, ledger).text("frames of {{set: 64 | frame size}} px, batch {{set: 64 | batch}}")
+    sites = contexts(text, ledger.sites)
+    assert [(s.num, s.reason) for s in sites.values()] == [("64", "setting of the study: frame size"),
+                                                         ("64", "setting of the study: batch")]
+    # the right context starts at the number itself, as it does in the reading of the PDF
+    assert sites[0].left.endswith("framesof") and sites[0].right.startswith("64px")
+    assert sites[1].left.endswith("batch")
+
+
+def test_contexts_refuses_a_mark_lost_from_the_text():
+    with pytest.raises(RuntimeError, match="missing"):
+        contexts("no marks here", {0: Site("64", "frame size")})
+
+
+def test_context_overlap():
+    assert _common_suffix("abcxyz", "qqxyz") == 3 and _common_prefix("xyzabc", "xyq") == 2
 
 
 def test_missing_value_fails_unless_draft():

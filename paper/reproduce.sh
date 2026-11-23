@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Regenerate everything the paper prints, from the committed result files, and audit it.
 #
-#   pip install osaudit==0.7.0         # Python >= 3.13
+#   pip install "osaudit @ git+https://github.com/ASSERT-KTH/osaudit@79e3bb737266e3162f66e4f213a4e985975bd5fb"   # Python >= 3.13
 #   paper/reproduce.sh
 #
 # 1. Each results file in results/paper/ is written by `osaudit run`, which records the command, the sha256 of

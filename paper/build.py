@@ -21,7 +21,7 @@ and placeholders, which are the only way a number enters the text:
     {{int: expr}}     a count (the value must be a JSON integer)
     {{p: expr}}       a p-value ("0.006", "0.39", "1", or "< 0.001"; "p = {{p: expr}}" then reads "p < 0.001")
     {{set: 64 | why}}       a setting of the study (an osaudit allow entry with that reason)
-    {{ext: 42 | [22] | why}} a number taken from a cited work (allow entry citing the reference)
+    {{ext: 42 | [22] | why}} a number taken from a cited work (allow entry naming the reference)
     {{fact: 3,000 | why}}   a recorded fact that no results file holds (allow entry with that reason)
 
 expr names a value of a results file in results/paper/ as osaudit does: <file stem>.<key>... with ["key"] for
@@ -39,6 +39,8 @@ import sys
 from dataclasses import dataclass, field
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
+
+from scope_allowances import MARK, Site, contexts, scoped_entries
 
 ROOT = Path(__file__).resolve().parents[1]
 PAPER = ROOT / "paper"
@@ -109,15 +111,28 @@ class Expr:
 class Ledger:
     """What osaudit must be told: one derive entry per printed number, one allow entry per setting/citation."""
     derive: dict[tuple[str, str], None] = field(default_factory=dict)
-    allow: dict[tuple[str, str, str], None] = field(default_factory=dict)
+    allow: dict[tuple[str, str], None] = field(default_factory=dict)
+    sites: dict[int, Site] = field(default_factory=dict)     # every printed number an allow entry justifies
+    scoped: list[dict] | None = None                         # the allow entries, one per printed occurrence
 
-    def toml(self) -> str:
+    def mark(self, num: str, reason: str) -> str:
+        """`num` as printed, preceded by an invisible mark that locates it (removed before the document is made)."""
+        self.allow[(num, reason)] = None
+        sid = len(self.sites)
+        self.sites[sid] = Site(num, reason)
+        return f"\ue000{sid}\ue001{num}"
+
+    def toml(self, scoped: bool = True) -> str:
         out = []
         for value, expr in self.derive:
             out += ["[[numbers.derive]]", f"value = {json.dumps(value)}", f"expr = {json.dumps(expr)}", ""]
-        for value, reason, cite in self.allow:
-            out += ["[[numbers.allow]]", f"value = {json.dumps(value)}", f"reason = {json.dumps(reason)}"]
-            out += [f"cite = {json.dumps(cite)}"] if cite else []
+        if not scoped:
+            return "\n".join(out)
+        for e in self.scoped if self.scoped is not None else [
+                {"value": v, "reason": r} for v, r in self.allow]:
+            out += ["[[numbers.allow]]", f"value = {json.dumps(e['value'])}", f"reason = {json.dumps(e['reason'])}"]
+            if "file" in e:
+                out += [f"file = {json.dumps(e['file'])}", f"line = {e['line']}", f"occurrence = {e['occurrence']}"]
             out += [""]
         return "\n".join(out)
 
@@ -141,16 +156,15 @@ class Formatter:
     def fmt(self, kind: str, arg: str) -> str:
         if kind == "set":
             num, why = (s.strip() for s in arg.split("|", 1))
-            self.ledger.allow[(num, f"setting of the study: {why}", "")] = None
-            return num
+            return self.ledger.mark(num, f"setting of the study: {why}")
         if kind == "fact":
             num, why = (s.strip() for s in arg.split("|", 1))
-            self.ledger.allow[(num, why, "")] = None
-            return num
+            return self.ledger.mark(num, why)
         if kind == "ext":
             num, key, why = (s.strip() for s in arg.split("|", 2))
-            self.ledger.allow[(num, f"reported by the cited work: {why}", key)] = None
-            return num
+            # The reference goes in the reason: osaudit's `cite` key scopes an entry to a \cite in LaTeX or
+            # Markdown source, so in an entry on the PDF it would match nothing.
+            return self.ledger.mark(num, f"reported by the cited work {key}: {why}")
         expr = arg.strip()
         try:
             v = self.ev(expr)
@@ -171,8 +185,7 @@ class Formatter:
         if kind == "p":
             if v < P_FLOOR:
                 why = "reporting floor for p-values (smaller values are printed as < 0.001)"
-                self.ledger.allow[(str(P_FLOOR), why, "")] = None
-                return f"< {P_FLOOR}"
+                return f"< {self.ledger.mark(str(P_FLOOR), why)}"
             s = "1" if v == 1 else _dec(v, 2) if v >= 0.0995 else _dec(v, 3)
             if s in ("1", "1.00") and v != 1:
                 s = _dec(v, 3)
@@ -255,7 +268,7 @@ def parse(md: str, f: Formatter, tables) -> dict:
             title = f.text(line.lstrip("# "))
             num = re.match(r"(?:Appendix )?([A-Z]?\d+(?:\.\d+)?|[A-Z]\.\d+)\.? ", title)
             if num and re.fullmatch(r"\d+\.\d+", num.group(1)):   # "5.2 Heading" reads as a number to osaudit
-                f.ledger.allow[(num.group(1), "section number", "")] = None
+                title = title[:num.start(1)] + f.ledger.mark(num.group(1), "section number") + title[num.end(1):]
             blocks.append({"type": "h2" if line.startswith("## ") else "h1", "text": title})
             continue
         if line == "REFERENCES":
@@ -299,6 +312,34 @@ def parse(md: str, f: Formatter, tables) -> dict:
     return {"meta": meta, "blocks": blocks}
 
 
+def document_text(spec: dict) -> str:
+    """The rendered text, block by block (table cells row by row), as a reader of the PDF meets it."""
+    parts = []
+    for b in spec["blocks"]:
+        if b["type"] == "table":
+            parts.append("".join(r["t"] for r in b["caption"]))
+            for row in [b["header"], *b["rows"]]:
+                parts.append(" ".join("".join(r["t"] for r in cell) for cell in row))
+        elif "runs" in b:
+            parts.append("".join(r["t"] for r in b["runs"]))
+        elif b["type"] == "figure":
+            parts.append("".join(r["t"] for r in b["caption"]))
+        elif "text" in b:
+            parts.append(b["text"])
+    return "\n".join(parts)
+
+
+def unmark(x):
+    """The spec without the marks that locate allowed numbers."""
+    if isinstance(x, str):
+        return MARK.sub("", x)
+    if isinstance(x, list):
+        return [unmark(y) for y in x]
+    if isinstance(x, dict):
+        return {k: unmark(y) for k, y in x.items()}
+    return x
+
+
 def osaudit_toml(ledger: Ledger) -> str:
     base = (PAPER / "osaudit.base.toml").read_text().rstrip()
     return (f'schema = "{SCHEMA}"\n\n# Generated by paper/build.py from paper/osaudit.base.toml and the placeholders of '
@@ -312,6 +353,8 @@ def main(draft: bool = False, source: str = "paper.md", name: str = "paper") -> 
     ledger = Ledger()
     f = Formatter(load_values(), ledger, draft)
     spec = parse((PAPER / source).read_text(), f, tables)
+    ledger.sites = contexts(document_text(spec), ledger.sites)
+    spec = unmark(spec)
     build = PAPER / "build"
     build.mkdir(exist_ok=True)
     (build / f"{name}.spec.json").write_text(json.dumps(spec, indent=1, ensure_ascii=False))
@@ -321,9 +364,12 @@ def main(draft: bool = False, source: str = "paper.md", name: str = "paper") -> 
                    capture_output=True)
     # a draft never overwrites the audited configuration; its entries go to paper/build/ for a trial audit
     if name == "paper":
-        (build / "osaudit.toml" if draft else ROOT / "osaudit.toml").write_text(osaudit_toml(ledger))
+        target = build / "osaudit.toml" if draft else ROOT / "osaudit.toml"
+        derive_only = osaudit_toml(ledger).replace(ledger.toml(), ledger.toml(scoped=False))
+        ledger.scoped = scoped_entries(ROOT, derive_only, ledger.sites, "paper/paper.pdf")
+        target.write_text(osaudit_toml(ledger))
     print(json.dumps({"docx": str(docx), "pdf": str(PAPER / f"{name}.pdf"), "derive": len(ledger.derive),
-                      "allow": len(ledger.allow), "pending": f.pending}, indent=1))
+                      "allow": len(ledger.scoped or ledger.allow), "pending": f.pending}, indent=1))
 
 
 if __name__ == "__main__":
