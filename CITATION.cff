@@ -7,6 +7,37 @@ authors:
     given-names: Simone
     email: simone.bonaccorsi46@gmail.com
     orcid: "https://orcid.org/0009-0007-3479-3327"
+abstract: >-
+  Joint-embedding predictive (JEPA) world models such as LeWM usually act by planning: they search for action
+  sequences whose imagined outcome matches a goal image. When such a model is small, what limits
+  goal-conditioned control: what the latent represents, how the controller is structured, or how actions are
+  chosen? We study this in a deliberately small setting: 64-pixel frames, a ViT-tiny encoder, about 18 M
+  parameters and one free GPU, on the Cube manipulation task of OGBench. LeWM's Cube evaluation takes start and
+  goal frames 25 steps apart from expert episodes; in data we generated with the authors' collector, 71.3% of
+  such pairs are already solved at the start, so we evaluate on pairs that are not, with hypotheses fixed before
+  the runs, paired tests and 3 training seeds, and report each seed separately. Three findings hold in every
+  seed. (1) A goal-conditioned policy over the world model's latent ("System 1") beats planning with CEM at this
+  scale, 55% vs 18%, and decides about 630 times faster in our CPU benchmark. (2) Adding the object's position
+  as a training-only target for the latent raises success from 66% to 82% and makes the cube readable from the
+  latent to 2.0 cm instead of 6.0 cm. (3) A slow subgoal network over System 1 raises success on goals twice as
+  far away (52% vs 33% on the object-grounded model), and the gain recurs, modestly, on a second environment,
+  TwoRoom. When half the camera frames are lost, filling them with the world model's prediction beats holding
+  the last frame (75% vs 58%) and approximately recovers the camera-on score. In contrast, using the world model
+  to choose among System 1's proposals lowered success, and even a privileged judge that executes every
+  candidate adds only 5 of 50 episodes for the candidates tested. A hybrid Mamba-3/attention predictor matches
+  the transformer. In a pre-registered follow-up on smaller models, making System 1 decide after every step
+  lowered its success from 62.5% to 36%, also when it was trained to output a single step, whereas step-wise
+  inverse-dynamics controllers worked at that rate (the GC-IDM authors' code 54%, our reimplementation 60%); we
+  did not detect a difference between them and System 1 committing to 25 steps. In this reduced-scale setting,
+  how well the latent represents the task's object appears to matter more than online action search, and the
+  world model is most useful as a source of training signals, subgoals and memory.
+keywords:
+  - world models
+  - JEPA
+  - goal-conditioned policy
+  - robot manipulation
+  - model-based planning
+  - representation learning
 repository-code: "https://github.com/simo1946/grounded-jepa-system1"
 license: MIT
 preferred-citation:
