@@ -1,6 +1,8 @@
 # Grounded JEPA World Models for Fast System-1 Control
 
-Code for the paper of the same name (Simone Bonaccorsi, 2026). It studies which parts of a small JEPA world
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24500295.svg)](https://doi.org/10.5281/zenodo.24500295)
+
+Code for the paper of the same name (Simone Bonaccorsi, 2026), archived on Zenodo: https://doi.org/10.5281/zenodo.24500295 (all versions). It studies which parts of a small JEPA world
 model (LeWM) make a simulated robot succeed on the OGBench Cube task: grounding the latent on the object,
 a fast goal-conditioned policy ("System 1") instead of planning, a slow subgoal network for far goals, the
 world model as memory when camera frames are lost, and why choosing among the policy's proposals with the

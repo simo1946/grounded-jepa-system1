@@ -38,6 +38,7 @@ keywords:
   - robot manipulation
   - model-based planning
   - representation learning
+doi: "10.5281/zenodo.24500295"
 repository-code: "https://github.com/simo1946/grounded-jepa-system1"
 license: MIT
 preferred-citation:
